@@ -13,5 +13,7 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
   - [Local Kubernetes with Docker Client](docs/local-kubernetes.md)
   
   - [Kops](docs/kops.md)
+
+  - [Optional Virtual Environment](docs/virtual-environment.md)
   
 - [Useful Commands](docs/commands.md)  

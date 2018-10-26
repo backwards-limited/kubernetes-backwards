@@ -3,6 +3,7 @@
 Minikube and Docker Client are only for local testing on a one node Kubernetes cluster.
 
 Let's have a look at a production ready cluster on [AWS](https://aws.amazon.com/) using [Kops](https://github.com/kubernetes/kops) (though there are alternatives).
+Other useful documentation can be found at [Kubernetes Kops](https://kubernetes.io/docs/setup/custom-cloud/kops/) and [AWS Kops](https://aws.amazon.com/blogs/compute/kubernetes-clusters-aws-kops/).
 
 From above, you should already have Kops and the AWS CLI installed - this will allow us to create a Kubernetes cluster on AWS (making sure you have an AWS account setup).
 
@@ -11,13 +12,10 @@ As a sidenote, we could create a virtual Linux environment with **Vagrant** and 
 > ![Open IAM in AWS](images/aws-iam-open.png)
 
 
-
 > ![Open IAM Users](images/aws-iam-users-open.png)
 
 
-
 > ![IAM Add user](images/aws-iam-add-user.png)
-
 
 
 > ![IAM New user step 1](images/aws-iam-new-user-1.png)
@@ -100,55 +98,96 @@ Finally the name server URLs that are generated for us have to be added to which
 
 > ![1 & 1 Save NS](images/1&1-save-ns.png)
 
+## Launch a Kubernetes cluster on AWS
 
-## Kops in Virtual Environment (Optional)
-
-Firstly some [Vagrant](http://sourabhbajaj.com/mac-setup/Vagrant/README.html) setup which will provide a **Linux** virtual environment, no matter which OS you are running on.
-
-If you have issues with setting up Vagrant (in the steps below as I did) this may be because of already having Vagrant configured but with incompatible library versions, firstly run:
+Firstly, if, like myself, you have multiple AWS accounts and so multiple profiles, select the desire profile to run **kops** e.g.
 
 ```bash
-vagrant plugin expunge
+export AWS_PROFILE=kops
 ```
 
-Now we can proceed:
+and watch out for selecting the correct region e.g.
 
 ```bash
-cd ~
-
-mkdir ubuntu
-
-cd ubuntu
-
-vagrant init ubuntu/xenial64
-
-vagrant up
-
-vagrant ssh-config
-
-vagrant ssh
+aws ec2 describe-availability-zones --region eu-west-1
 ```
 
-Your prompt will end up as:
+The following command prepares your cluster:
 
 ```bash
-vagrant@ubuntu-xenial:~$
+kops create cluster \
+--name kubernetes.backwards.limited \
+--dns-zone kubernetes.backwards.limited \
+--zones eu-west-1a \
+--state s3://kops-my-kubernetes \
+--node-count 2 \
+--node-size t2.micro \
+--master-size t2.micro
 ```
 
-At your "new" prompt we shall install Kops:
+The result is a preview to double check before launching.
+
+So let's launch:
 
 ```bash
-curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
-
-chmod +x kops-linux-amd64
-
-sudo apt-get install python-pip
-
-sudo pip install awscli
+kops update cluster kubernetes.backwards.limited --yes --state=s3://kops-my-kubernetes
 ```
 
-When you are done with the environment, don't forget to cleanup:
+## Test the Cluster
 
 ```bash
-vagrant halt
+$ kubectl get nodes
+NAME                                          STATUS    ROLES     AGE       VERSION
+ip-172-20-35-203.eu-west-1.compute.internal   Ready     master    4m        v1.10.6
+ip-172-20-37-2.eu-west-1.compute.internal     Ready     node      2m        v1.10.6
+ip-172-20-60-233.eu-west-1.compute.internal   Ready     node      3m        v1.10.6
+
+$ kubectl run hello-minikube --image=k8s.gcr.io/echoserver:1.4 --port=8080
+deployment "hello-minikube" created
+
+$ kubectl expose deployment hello-minikube --type=NodePort
+service "hello-minikube" expose
+
+$ kubectl get services
+NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+hello-minikube   NodePort    100.64.230.8   <none>        8080:31122/TCP   3m
+kubernetes       ClusterIP   100.64.0.1     <none>        443/TCP          23m
 ```
+
+So we have a service deployed and exposed on our cluster.
+To access the service we still have to configure firewall rules in AWS:
+
+
+
+>![AWS View Firewall Rules](images/aws-view-firewall-ruled.png)
+
+
+
+> ![Edit/Add Firewall Rules](images/aws-edit-firewall-rules.png)
+
+
+
+> ![AWS Add Firewall Rule](images/aws-add-firewall-rule.png)
+
+
+
+> ![AWS Instance IP](images/aws-ip.png)
+
+
+
+```bash
+$ curl 54.229.201.185:31122
+CLIENT VALUES:
+client_address=172.20.60.233
+command=GET
+...
+```
+
+Finally bring down the cluster after testing:
+
+```bash
+kops delete cluster kubernetes.backwards.limited --state=s3://kops-my-kubernetes
+
+kops delete cluster kubernetes.backwards.limited --state=s3://kops-my-kubernetes --yes
+```
+
