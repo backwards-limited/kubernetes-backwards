@@ -7,7 +7,7 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
 ## Table of Contents
 
 - [Setup](docs/setup.md)
-
+  
   - [Minikube](docs/minikube.md)
   
   - [Local Kubernetes with Docker Client](docs/local-kubernetes.md)
@@ -15,5 +15,7 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
   - [Kops](docs/kops.md)
 
   - [Optional Virtual Environment](docs/virtual-environment.md)
+
+  - [Domain Name](docs/domain-name.md)
   
 - [Useful Commands](docs/commands.md)  
