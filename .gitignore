@@ -69,32 +69,7 @@ fabric.properties
 
 devops-box
 
-kubernetes-course/affinity
-kubernetes-course/autoscaling
-kubernetes-course/configmap
-kubernetes-course/dashboard
-kubernetes-course/deployment
-kubernetes-course/elb-tls
-kubernetes-course/external-dns
-kubernetes-course/first-app
-kubernetes-course/helm
-kubernetes-course/ingress
-kubernetes-course/istio
-kubernetes-course/kubeless
-kubernetes-course/metrics-server
-kubernetes-course/pod-lifecycle
-kubernetes-course/pod-presets
-kubernetes-course/postgres-operator
-kubernetes-course/replication-controller
-kubernetes-course/resourcequotas
-kubernetes-course/service-discovery
-kubernetes-course/statefulset
-kubernetes-course/tolerations
-kubernetes-course/users
-kubernetes-course/volumes
-kubernetes-course/wordpress
-kubernetes-course/wordpress-volumes
-kubernetes-course/ProcedureDocument.md
+
 
 
 .java-version
