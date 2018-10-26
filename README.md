@@ -18,4 +18,8 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
 
   - [Domain Name](docs/domain-name.md)
   
-- [Useful Commands](docs/commands.md)  
+- [Useful Commands](docs/commands.md) 
+
+- Courses
+
+  - [The Complete Kubernetes Course](kubernetes-course/README.md)
