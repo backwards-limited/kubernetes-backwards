@@ -151,9 +151,9 @@ Just as with Minikube, we need a cluster set up on our cloud provider - we alrea
   Validating cluster kubernetes.backwards.limited
   
   INSTANCE GROUPS
-  NAME			         ROLE	   MACHINETYPE	MIN	 MAX	SUBNETS
-  master-eu-west-1a	 Master	 t2.micro	    1	   1	  eu-west-1a
-  nodes			         Node	   t2.micro	    2	   2	  eu-west-1a
+  NAME			         ROLE	    MACHINETYPE	   MIN	  MAX	  SUBNETS
+  master-eu-west-1a  Master	  t2.micro	     1	    1	    eu-west-1a
+  nodes			         Node	    t2.micro	     2	    2	    eu-west-1a
   ```
 
 - Deploy service
