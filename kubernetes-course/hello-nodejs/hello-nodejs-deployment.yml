@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-nodejs-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-nodejs
+  template:
+    metadata:
+      labels:
+        app: hello-nodejs
+    spec:
+      containers:
+        - name: hello-nodejs
+          image: davidainslie/hello-nodejs
+          ports:
+            - name: app-port
+              containerPort: 3000
