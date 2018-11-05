@@ -481,3 +481,75 @@ HTTP/1.1 200 OK
 Hello NodeJS World
 ```
 
+## Node Selector
+
+How about deploying a pod to a node with desired attributes? Here is a configuration that declares a required **node selector**:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-1-deployment
+spec:
+  replicas: 3
+  revisionHistoryLimit: 100
+  selector:
+    matchLabels:
+      app: app-1
+  template:
+    metadata:
+      labels:
+        app: app-1
+    spec:
+      containers:
+        - name: app-1
+          image: davidainslie/hello-nodejs
+          ports:
+            - name: app-port
+              containerPort: 3000
+      nodeSelector:
+        hardware: high-spec
+```
+
+Let's deploy and see what goes wrong:
+
+```bash
+$ kubectl create -f app-1-node-selector-deployment.yml
+deployment "app-1-deployment" created
+
+$ kubectl get pods
+NAME                               READY     STATUS    RESTARTS   AGE
+app-1-deployment-84d4f9679-6dpvr   0/1       Pending   0          17s
+app-1-deployment-84d4f9679-9sj25   0/1       Pending   0          17s
+app-1-deployment-84d4f9679-tpr45   0/1       Pending   0          17s
+
+$ kubectl describe pod app-1-deployment-84d4f9679-6dpvr
+Name:           app-1-deployment-84d4f9679-6dpvr
+...
+Events:
+  Type     Reason            Age               From               Message
+  ----     ------            ----              ----               -------
+  Warning  FailedScheduling  0s (x10 over 2m)  default-scheduler  0/1 nodes are available: 1 node(s) didn't match node selector.
+```
+
+To resolve, label our (one and only) node that is named **minikube**  - indeed minikube only ever has one node:
+
+```bash
+$ kubectl label nodes minikube hardware=high-spec
+node "minikube" labeled
+
+$ kubectl get nodes --show-labels
+NAME       STATUS    ROLES     AGE       VERSION   LABELS
+minikube   Ready     master    2h        v1.10.0   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,hardware=high-spec,kubernetes.io/hostname=minikube,node-role.kubernetes.io/master=
+```
+
+and soon after our deployment will be up:
+
+```bash
+$ kubectl get pods
+NAME                               READY     STATUS    RESTARTS   AGE
+app-1-deployment-84d4f9679-6dpvr   1/1       Running   0          11m
+app-1-deployment-84d4f9679-9sj25   1/1       Running   0          11m
+app-1-deployment-84d4f9679-tpr45   1/1       Running   0          11m
+```
+

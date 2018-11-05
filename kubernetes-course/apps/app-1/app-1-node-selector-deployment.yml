@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-1-deployment
+spec:
+  replicas: 3
+  revisionHistoryLimit: 100
+  selector:
+    matchLabels:
+      app: app-1
+  template:
+    metadata:
+      labels:
+        app: app-1
+    spec:
+      containers:
+        - name: app-1
+          image: davidainslie/hello-nodejs
+          ports:
+            - name: app-port
+              containerPort: 3000
+      nodeSelector:
+        hardware: high-spec
