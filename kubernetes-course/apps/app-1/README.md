@@ -30,7 +30,17 @@ docker push <your login>/hello-nodejs
 Note, we could have tagged the image while building to avoid doing step 2 above e.g.
 
 ```bash
-docker build -t <your login>/hello-nodejs .
+docker build -t davidainslie/hello-nodejs .
+```
+
+and to build and tag a newer version (the previous command builds/tags as **latest**):
+
+```bash
+docker build -t davidainslie/hello-nodejs:1.0.1 .
+
+docker push davidainslie/hello-nodejs
+OR
+docker push davidainslie/hello-nodejs:1.0.1
 ```
 
 ## Kubernetes Deployment
@@ -271,32 +281,127 @@ $ kubectl get replicaset
 NAME                                DESIRED   CURRENT   READY     AGE
 app-1-deployment-54cbb9dcd          3         3         3         1m
 
-$ kubectl get pods
-NAME                                      READY     STATUS    RESTARTS   AGE
-app-1-deployment-54cbb9dcd-5cvdq          1/1       Running   0          1m
-app-1-deployment-54cbb9dcd-m4p4h          1/1       Running   0          1m
-app-1-deployment-54cbb9dcd-p7j5n          1/1       Running   0          1m
+$ kubectl get pods --show-labels
+NAME                              READY  STATUS   RESTARTS  AGE  LABELS
+app-1-deployment-f7b6979dd-bljqd  1/1    Running  0         9m   app=app-1
+app-1-deployment-f7b6979dd-j8s6n  1/1    Running  0         9m   app=app-1
+app-1-deployment-f7b6979dd-z99wl  1/1    Running  0         9m   app=app-1
+```
+
+Expose service:
+
+```bash
+$ kubectl expose deployment app-1-deployment --type=NodePort
+service "app-1-deployment" exposed
+
+$ kubectl get services
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+app-1-deployment   NodePort    10.98.179.136   <none>        3000:30455/TCP   33s
+kubernetes         ClusterIP   10.96.0.1       <none>        443/TCP          40m
+
+$ kubectl describe service app-1-deployment
+Name:                     app-1-deployment
+Namespace:                default
+Labels:                   app=app-1
+Annotations:              <none>
+Selector:                 app=app-1
+Type:                     NodePort
+IP:                       10.98.179.136
+Port:                     <unset>  3000/TCP
+TargetPort:               3000/TCP
+NodePort:                 <unset>  30455/TCP
+Endpoints:                172.17.0.7:3000,172.17.0.8:3000,172.17.0.9:3000
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+and check the app/service:
+
+```bash
+$ http $(minikube service app-1-deployment --url)
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 18
+Content-Type: text/html; charset=utf-8
+Date: Mon, 05 Nov 2018 11:08:56 GMT
+ETag: W/"12-vI1WomQOBH5Oo8OGm4j3tKeWkGI"
+X-Powered-By: Express
+
+Hello NodeJS World
 ```
 
 Rollout a new version:
 
 ```bash
-kubectl set image deployment/app-1-deployment app-1=app-1:2
+$ kubectl set image deployment/app-1-deployment app-1=davidainslie/hello-nodejs:1.0.1
+deployment "app-1-deployment" image updated
 ```
 
 Rollout status:
 
 ```bash
-kubectl rollout status deployment/app-1-deployment
+$ kubectl rollout status deployment/app-1-deployment
+deployment "app-1-deployment" successfully rolled out
+```
+
+and again check the service to (hopefully) see a new message:
+
+```bash
+$ http $(minikube service app-1-deployment --url)
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 24
+Content-Type: text/html; charset=utf-8
+Date: Mon, 05 Nov 2018 11:21:55 GMT
+ETag: W/"18-Ryncjbdh8wfos2XOKZDpa8YBfqg"
+X-Powered-By: Express
+
+Hello Again NodeJS World
+```
+
+Rollout history:
+
+```bash
+$ kubectl rollout history deployment/app-1-deployment
+deployments "app-1-deployment"
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
 ```
 
 Rollback to previous version:
 
 ```bash
-kubectl rollout undo deployment/app-1-deployment
+$ kubectl rollout undo deployment/app-1-deployment
+deployment "app-1-deployment"
+
+$ kubectl get pods
+NAME                               READY     STATUS        RESTARTS   AGE
+app-1-deployment-598d76fd-758sw    1/1       Terminating   0          5m
+app-1-deployment-598d76fd-nmzdp    1/1       Terminating   0          5m
+app-1-deployment-598d76fd-t9bnm    1/1       Terminating   0          5m
+app-1-deployment-f7b6979dd-mffv9   1/1       Running       0          6s
+app-1-deployment-f7b6979dd-rm78x   1/1       Running       0          10s
+app-1-deployment-f7b6979dd-wvs52   1/1       Running       0          2s
 ```
 
-or rollback to specific version:
+and again check the service message shows the original:
+
+```bash
+$ http $(minikube service app-1-deployment --url)
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 18
+Content-Type: text/html; charset=utf-8
+Date: Mon, 05 Nov 2018 11:27:32 GMT
+ETag: W/"12-vI1WomQOBH5Oo8OGm4j3tKeWkGI"
+X-Powered-By: Express
+
+Hello NodeJS World
+```
+
+Or rollback to specific version:
 
 ```bash
 kubectl rollout undo deployment/app-1-deployment --to-revision=1
