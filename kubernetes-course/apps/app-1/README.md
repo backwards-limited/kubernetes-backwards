@@ -80,7 +80,7 @@ If you make a mistake along the way and wish to start again:
 kubectl delete pods --all
 ```
 
-## Deployment as a Service
+## Deployment as a Service - Part 1
 
 There are different ways to expose the deployment as a service.
 
@@ -406,3 +406,78 @@ Or rollback to specific version:
 ```bash
 kubectl rollout undo deployment/app-1-deployment --to-revision=1
 ```
+
+## Deployment as a Service - Part 2
+
+Part 1 showed **port forwarding** which is fine for testing. Let's instead have a **service yaml**, first of all with a static **node port**:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-1-service
+spec:
+  selector:
+    app: app-1
+  type: NodePort
+  ports:
+    - port: 31001
+      nodePort: 31001
+      targetPort: app-port
+      protocol: TCP
+```
+
+Now deploy and expose service:
+
+```bash
+$ kubectl create -f app-1-deployment.yml
+deployment "app-1-deployment" created
+
+$ kubectl create -f app-1-nodeport-service.yml
+service "app-1-service" created
+
+$ http $(minikube service app-1-service --url)
+HTTP/1.1 200 OK
+...
+Hello NodeJS World
+```
+
+Delete the service and then alter **service** so that an available **node port** is automatically generated:
+
+```bash
+$ kubectl delete service app-1-service
+service "app-1-service" deleted
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-1-service
+spec:
+  selector:
+    app: app-1
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: app-port
+      protocol: TCP
+```
+
+```bash
+$ kubectl create -f app-1-nodeport-service.yml
+service "app-1-service" created
+
+$ kubectl get services
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+app-1-service      NodePort    10.111.64.174   <none>        80:30368/TCP     8s
+
+$ minikube service app-1-service --url
+http://192.168.99.100:30368
+
+$ http http://192.168.99.100:30368
+HTTP/1.1 200 OK
+...
+Hello NodeJS World
+```
+
