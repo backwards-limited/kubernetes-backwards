@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-nodejs-deployment
+  name: app-1-deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: hello-nodejs
+      app: app-1
   template:
     metadata:
       labels:
-        app: hello-nodejs
+        app: app-1
     spec:
       containers:
-        - name: hello-nodejs
+        - name: app-1
           image: davidainslie/hello-nodejs
           ports:
             - name: app-port

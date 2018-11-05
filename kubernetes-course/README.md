@@ -4,6 +4,6 @@ Following the excellent [The Complete Kubernetes Course](https://www.udemy.com/l
 
 ## Table of Contents
 
-- Modules
+- Apps
   
-  - [Hello NodeJS Container Deployed to Kubernetes](hello-nodejs/README.md)
+  - [One](apps/app-1/README.md)

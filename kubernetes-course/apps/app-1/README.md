@@ -1,4 +1,4 @@
-# Hello NodeJS Container Deployed to Kubernetes
+# App 1 - NodeJS Container Deployed to Kubernetes
 
 ## Build and Execute
 
@@ -48,18 +48,18 @@ minikube   Ready     master    3m        v1.10.0
 Create a Kubernetes deployment, in this case using a **pod** definition:
 
 ```bash
-$ kubectl create -f hello-nodejs-pod.yml
-pod "hello-nodejs" created
+$ kubectl create -f app-1-pod.yml
+pod "app-1" created
 
 $ kubectl get pods
 NAME           READY     STATUS              RESTARTS   AGE
-hello-nodejs   0/1       ContainerCreating   0          3s
+app-1          0/1       ContainerCreating   0          3s
 
-$ kubectl describe pod hello-nodejs
-Name:         hello-nodejs
+$ kubectl describe pod app-1
+Name:         app-1
 ...
 
-$ kubectl logs hello-nodejs
+$ kubectl logs app-1
 ...
 > myapp@0.0.1 start /app
 ```
@@ -77,7 +77,7 @@ There are different ways to expose the deployment as a service.
 - Port foward:
 
   ```bash
-  $ kubectl port-forward hello-nodejs 8081:3000
+  $ kubectl port-forward app-1 8081:3000
   Forwarding from 127.0.0.1:8081 -> 3000
   
   $ curl localhost:8081
@@ -87,10 +87,10 @@ There are different ways to expose the deployment as a service.
 - Expose service:
 
   ```bash
-  $ kubectl expose pod hello-nodejs --type NodePort --name hello-nodejs-service
-  service "hello-nodejs-service" exposed
+  $ kubectl expose pod app-1 --type NodePort --name app-1-service
+  service "app-1-service" exposed
   
-  $ minikube service hello-nodejs-service --url
+  $ minikube service app-1-service --url
   http://192.168.99.100:31740
   
   $ curl http://192.168.99.100:31740
@@ -102,8 +102,8 @@ There are different ways to expose the deployment as a service.
 There are various ways to interact with our cluster. Here is an example of starting up another pod to then directly interact with the pod that houses our deployed service.
 
 ```bash
-$ kubectl describe service hello-nodejs-service
-Name:                     hello-nodejs-service
+$ kubectl describe service app-1-service
+Name:                     app-1-service
 ...
 Endpoints:                172.17.0.7:3000
 ...
@@ -159,11 +159,11 @@ Just as with Minikube, we need a cluster set up on our cloud provider - we alrea
 - Deploy service
 
   ```bash
-  $ kubectl create -f hello-nodejs-pod.yml
-  pod "hello-nodejs" created
+  $ kubectl create -f app-1-pod.yml
+  pod "app-1" created
   
-  $ kubectl create -f hello-nodejs-service.yml
-  service "hello-nodejs-service" created
+  $ kubectl create -f app-1-service.yml
+  service "app-1-service" created
   ```
 
   > ![Load Balancer](docs/images/aws-load-balancer.png)
@@ -190,44 +190,44 @@ Just as with Minikube, we need a cluster set up on our cloud provider - we alrea
 Let's auto scale our service via **replication controllers**. With a local **minikube** running:
 
 ```bash
-$ kubectl create -f hello-nodejs-replication-controller.yml
+$ kubectl create -f app-1-replication-controller.yml
 
 $ kubectl get pods
 NAME                            READY     STATUS    RESTARTS   AGE
-hello-nodejs-controller-5ksxw   1/1       Running   0          4s
-hello-nodejs-controller-h5zfq   1/1       Running   0          4s
+app-1-controller-5ksxw   1/1    Running   0          4s
+app-1-controller-h5zfq   1/1    Running   0          4s
 ```
 
 In this case 2 pods will be instantiated. If we wish to bring them down:
 
 ```bash
-kubectl delete -f hello-nodejs-replication-controller.yml
+kubectl delete -f app-1-replication-controller.yml
 ```
 
 Bring down one pod and another will automatically come up:
 
 ```bash
-$ kubectl delete pod hello-nodejs-controller-5ksxw
+$ kubectl delete pod app-1-controller-5ksxw
 
 $ kubectl get pods
 NAME                            READY     STATUS        RESTARTS   AGE
-hello-nodejs-controller-5ksxw   1/1       Terminating   0          4m
-hello-nodejs-controller-8w54v   1/1       Running       0          0s
-hello-nodejs-controller-h5zfq   1/1       Running       0          4m
+app-1-controller-5ksxw   1/1    Terminating   0          4m
+app-1-controller-8w54v   1/1    Running       0          0s
+app-1-controller-h5zfq   1/1    Running       0          4m
 ```
 
 Scale up:
 
 ```bash
-$ kubectl scale --replicas=5 -f hello-nodejs-replication-controller.yml
+$ kubectl scale --replicas=5 -f app-1-replication-controller.yml
 
 $ kubectl get pods
 NAME                            READY     STATUS              RESTARTS   AGE
-hello-nodejs-controller-4b9xb   1/1       Running             0          0s
-hello-nodejs-controller-8w54v   1/1       Running             0          2m
-hello-nodejs-controller-frplw   0/1       ContainerCreating   0          0s
-hello-nodejs-controller-h5zfq   1/1       Running             0          6m
-hello-nodejs-controller-lqpw7   0/1       ContainerCreating   0          0s
+app-1-controller-4b9xb   1/1    Running             0          0s
+app-1-controller-8w54v   1/1    Running             0          2m
+app-1-controller-frplw   0/1    ContainerCreating   0          0s
+app-1-controller-h5zfq   1/1    Running             0          6m
+app-1-controller-lqpw7   0/1    ContainerCreating   0          0s
 ```
 
 Scale again (slightly differently):
@@ -235,21 +235,21 @@ Scale again (slightly differently):
 ```bash
 $ kubectl get rc
 NAME                      DESIRED   CURRENT   READY     AGE
-hello-nodejs-controller   5         5         5         8m
+app-1-controller          5         5         5         8m
 
-$ kubectl scale --replicas=1 rc/hello-nodejs-controller
+$ kubectl scale --replicas=1 rc/app-1-controller
 NAME                            READY     STATUS        RESTARTS   AGE
-hello-nodejs-controller-4b9xb   1/1       Terminating   0          3m
-hello-nodejs-controller-8w54v   1/1       Terminating   0          5m
-hello-nodejs-controller-frplw   1/1       Terminating   0          3m
-hello-nodejs-controller-h5zfq   1/1       Running       0          10m
-hello-nodejs-controller-lqpw7   1/1       Terminating   0          3m
+app-1-controller-4b9xb          1/1       Terminating   0          3m
+app-1-controller-8w54v          1/1       Terminating   0          5m
+app-1-controller-frplw          1/1       Terminating   0          3m
+app-1-controller-h5zfq          1/1       Running       0          10m
+app-1-controller-lqpw7          1/1       Terminating   0          3m
 ```
 
 And finally delete:
 
 ```bash
-kubectl delete rc/hello-nodejs-controller
+kubectl delete rc/app-1-controller
 ```
 
 Note that **ReplicaSet** is just the next generation **Replication Controller**.
@@ -261,44 +261,43 @@ However, it is best to use a **deployment**.
 Deploy:
 
 ```bash
-$ kubectl create -f hello-nodejs-deployment.yml
+$ kubectl create -f app-1-deployment.yml
 
 $ kubectl get deployments
 NAME                      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-hello-nodejs-deployment   3         3         3            3           7s
+app-1-deployment          3         3         3            3           7s
 
 $ kubectl get replicaset
 NAME                                DESIRED   CURRENT   READY     AGE
-hello-nodejs-deployment-54cbb9dcd   3         3         3         1m
+app-1-deployment-54cbb9dcd          3         3         3         1m
 
 $ kubectl get pods
 NAME                                      READY     STATUS    RESTARTS   AGE
-hello-nodejs-deployment-54cbb9dcd-5cvdq   1/1       Running   0          1m
-hello-nodejs-deployment-54cbb9dcd-m4p4h   1/1       Running   0          1m
-hello-nodejs-deployment-54cbb9dcd-p7j5n   1/1       Running   0          1m
+app-1-deployment-54cbb9dcd-5cvdq          1/1       Running   0          1m
+app-1-deployment-54cbb9dcd-m4p4h          1/1       Running   0          1m
+app-1-deployment-54cbb9dcd-p7j5n          1/1       Running   0          1m
 ```
 
 Rollout a new version:
 
 ```bash
-kubectl set image deployment/hello-nodejs-deployment hello-nodejs=hello-nodejs:2
+kubectl set image deployment/app-1-deployment app-1=app-1:2
 ```
 
 Rollout status:
 
 ```bash
-kubectl rollout status deployment/hello-nodejs-deployment
+kubectl rollout status deployment/app-1-deployment
 ```
 
 Rollback to previous version:
 
 ```bash
-kubectl rollout undo deployment/hello-nodejs-deployment
+kubectl rollout undo deployment/app-1-deployment
 ```
 
 or rollback to specific version:
 
 ```bash
-kubectl rollout undo deployment/hello-nodejs-deployment --to-revision=1
+kubectl rollout undo deployment/app-1-deployment --to-revision=1
 ```
-
