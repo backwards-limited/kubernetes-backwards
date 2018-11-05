@@ -1,4 +1,4 @@
-# App 1 - NodeJS Container Deployed to Kubernetes
+# App 1 - Hello World Container Deployed to Kubernetes
 
 ## Build and Execute
 

@@ -1,27 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-1-deployment
+  name: app-3
 spec:
   replicas: 3
   revisionHistoryLimit: 100
   selector:
     matchLabels:
-      app: app-1
+      app: app-3
   template:
     metadata:
       labels:
-        app: app-1
+        app: app-3
     spec:
       containers:
-        - name: app-1
+        - name: hello-nodejs
           image: davidainslie/hello-nodejs
           ports:
             - name: app-port
               containerPort: 3000
+          volumeMounts:
+            - name: credentials-volume
+              mountPath: /etc/credentials
+              readOnly: true
           resources:
             limits:
               memory: 256Mi
               cpu: 250m    
-      nodeSelector:
-        hardware: high-spec
+      volumes:
+        - name: credentials-volume
+          secret: 
+            secretName: my-credentials

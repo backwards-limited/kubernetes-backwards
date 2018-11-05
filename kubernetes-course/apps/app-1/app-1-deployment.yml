@@ -19,3 +19,19 @@ spec:
           ports:
             - name: app-port
               containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: app-port
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: app-port
+            initialDelaySeconds: 15
+            timeoutSeconds: 30
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 250m  

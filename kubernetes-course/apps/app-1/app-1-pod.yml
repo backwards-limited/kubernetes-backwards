@@ -11,3 +11,7 @@ spec:
       ports:
         - name: app-port
           containerPort: 3000
+      resources:
+        limits:
+          memory: 256Mi
+          cpu: 250m    
