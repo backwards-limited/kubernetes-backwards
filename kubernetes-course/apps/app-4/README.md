@@ -1,4 +1,4 @@
-# App 4 - Web UI
+# Web UI
 
 - Minikube
 

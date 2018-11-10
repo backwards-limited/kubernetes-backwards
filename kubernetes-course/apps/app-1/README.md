@@ -1,4 +1,4 @@
-# App 1 - Hello World Container Deployed to Kubernetes
+# Hello World Container Deployed to Kubernetes
 
 ## Build and Execute
 
@@ -46,7 +46,7 @@ docker push davidainslie/hello-nodejs:1.0.1
 and how about multiple tags:
 
 ```bash
-docker build -t davidainslie/hello-nodejs:latest -t davidainslie/hello-nodejs:1.0.2 .
+docker build -t davidainslie/hello-nodejs:latest -t davidainslie/hello-nodejs:1.1.0 .
 ```
 
 ## Kubernetes Deployment

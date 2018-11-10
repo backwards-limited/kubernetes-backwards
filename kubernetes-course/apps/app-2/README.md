@@ -1,4 +1,4 @@
-# App 2 - Pod Lifecycle
+# Pod Lifecycle
 
 We have a deployment that shows some lifecycle events of a pod:
 

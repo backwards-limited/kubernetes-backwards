@@ -1,4 +1,4 @@
-# App 3 - Secrets
+# Secrets
 
 - Secrets using files:
 

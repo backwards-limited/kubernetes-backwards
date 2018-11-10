@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-v2-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 100
+  selector:
+    matchLabels:
+      app: webapp-v2
+  template:
+    metadata:
+      labels:
+        app: webapp-v2
+    spec:
+      containers:
+        - name: webapp
+          image: davidainslie/hello-nodejs:1.1.0
+          ports:
+            - name: nodejs-port
+              containerPort: 3000
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 250m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-v2
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30304
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: webapp-v2

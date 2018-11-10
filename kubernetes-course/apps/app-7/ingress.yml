@@ -1,0 +1,21 @@
+# An Ingress with 2 hosts and 3 endpoints
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress-rules
+spec:
+  rules:
+    - host: webapp-v1.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: webapp-v1
+              servicePort: 80
+    - host: webapp-v2.example.com
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: webapp-v2
+            servicePort: 80

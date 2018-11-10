@@ -1,4 +1,4 @@
-# App 5 - DNS
+# DNS
 
 > ![DNS](docs/images/dns.png)
 
@@ -7,6 +7,7 @@
 > ![DNS how it works](docs/images/dns-how-it-works.png)
 
 
+## Example
 
 So let's have a service in one pod, connecting to another service in another pod.
 
