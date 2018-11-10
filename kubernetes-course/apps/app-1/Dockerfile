@@ -1,10 +1,12 @@
-FROM node:4.6
+FROM node:8.9.4
 
 WORKDIR /app
 
 ADD . /app
 
-RUN npm install
+RUN \
+  cd /app && \
+  npm install
 
 EXPOSE 3000
 

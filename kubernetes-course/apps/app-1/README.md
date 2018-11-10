@@ -43,6 +43,12 @@ OR
 docker push davidainslie/hello-nodejs:1.0.1
 ```
 
+and how about multiple tags:
+
+```bash
+docker build -t davidainslie/hello-nodejs:latest -t davidainslie/hello-nodejs:1.0.2 .
+```
+
 ## Kubernetes Deployment
 
 As explained before, we first need a cluster - let's just use minikube:

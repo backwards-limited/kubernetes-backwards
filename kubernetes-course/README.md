@@ -13,3 +13,5 @@ Following the excellent [The Complete Kubernetes Course](https://www.udemy.com/l
   - [App 3 - Secrets](apps/app-3/README.md)
 
   - [App 4 - Web UI](apps/app-4/README.md)
+
+  - [App 5 - DNS](apps/app-5/README.md)

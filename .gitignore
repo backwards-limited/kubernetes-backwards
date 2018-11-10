@@ -68,6 +68,8 @@ fabric.properties
 !.vscode/extensions.json
 
 .java-version
+node_modules/
+package-lock.json
 
 devops-box
 

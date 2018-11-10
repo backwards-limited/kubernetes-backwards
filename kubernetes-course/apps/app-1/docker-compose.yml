@@ -15,7 +15,7 @@ services:
     command: node index-db.js
     ports:
       - "3000:3000"
-    links:
+    depends_on:
       - db
     environment:
       MYSQL_DATABASE: myapp
