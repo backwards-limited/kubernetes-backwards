@@ -47,7 +47,7 @@ Now, to be able to run commands on AWS from the AWS CLI, either:
 
   ```
   [profile kops]
-  region = eu-west-1
+  region = eu-west-2
   output = json
   ```
 
@@ -109,7 +109,7 @@ export AWS_PROFILE=kops
 and watch out for selecting the correct region e.g.
 
 ```bash
-aws ec2 describe-availability-zones --region eu-west-1
+aws ec2 describe-availability-zones --region eu-west-2
 ```
 
 The following command prepares your cluster:
@@ -118,7 +118,7 @@ The following command prepares your cluster:
 kops create cluster \
 --name kubernetes.backwards.limited \
 --dns-zone kubernetes.backwards.limited \
---zones eu-west-1a \
+--zones eu-west-2a \
 --state s3://kops-my-kubernetes \
 --node-count 2 \
 --node-size t2.micro \
