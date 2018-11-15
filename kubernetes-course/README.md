@@ -21,3 +21,5 @@ Following the excellent [The Complete Kubernetes Course](https://www.udemy.com/l
   - [Ingress](apps/app-7/README.md)
 
   - [External DNS](apps/app-8/README.md)
+
+  - [Volumes](apps/app-9/README.md)

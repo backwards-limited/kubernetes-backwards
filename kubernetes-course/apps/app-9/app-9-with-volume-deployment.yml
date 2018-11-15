@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-9-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 100
+  selector:
+    matchLabels:
+      app: app-9
+  template:
+    metadata:
+      labels:
+        app: app-9
+    spec:
+      containers:
+        - name: app-9
+          image: davidainslie/hello-nodejs
+          ports:
+            - name: nodejs-port
+              containerPort: 3000
+          volumeMounts:
+            - mountPath: /myvol
+              name: myvolume
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 250m    
+      volumes:
+        - name: myvolume
+          awsElasticBlockStore:
+            volumeID: vol-0ea1c3c9ea3c74112
