@@ -15,6 +15,7 @@ Install essentials:
 ```bash
 brew update
 brew install awscli
+brew install jq
 brew install kubernetes-cli
 brew install kubectl
 brew install kops

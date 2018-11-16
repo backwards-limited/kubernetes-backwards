@@ -200,8 +200,9 @@ metadata:
 spec:
 	accessModes:
 		- ReadWriteOnce
-	capacity:
-  	storage: 2Gi
+	resources:
+    requests:
+      storage: 2Gi
 ```
 
 And finally we can use the volume e.g.
@@ -226,3 +227,164 @@ spec:
 
 ## Example of using Auto Provisioning Volume
 
+Quick note - currently EFS is not supported in the London region, so let's go to Ireland.
+
+It's a wordpress service. There are a bunch of yamls one being [wordpress-web.yml](wordpress-web.yml) that uses a NFS volume and here we also have to manually create an EFS file system on AWS for saving images in wordpress:
+
+```bash
+$ export AWS_PROFILE=ireland
+
+$ aws s3 mb s3://ireland-kubernetes --region eu-west-1
+
+$ export KOPS_STATE_STORE=s3://ireland-kubernetes
+
+$ kops create cluster \
+--name kubernetes.backwards.limited \
+--dns-zone kubernetes.backwards.limited \
+--zones eu-west-1a \
+--state s3://ireland-kubernetes \
+--node-count 2 \
+--node-size t2.micro \
+--master-size t2.micro
+
+$ kops update cluster kubernetes.backwards.limited --yes
+
+$ kops validate cluster
+```
+
+```bash
+$ aws efs create-file-system --creation-token 2
+{
+    "OwnerId": "890953945913",
+    "CreationToken": "2",
+    "FileSystemId": "fs-f8ae5830",
+    "CreationTime": 1542309474.0,
+    "LifeCycleState": "creating",
+    "NumberOfMountTargets": 0,
+    "SizeInBytes": {
+        "Value": 0
+    },
+    "PerformanceMode": "generalPurpose",
+    "Encrypted": false,
+    "ThroughputMode": "bursting"
+}
+```
+
+where the token just has to be unique (you can choose 1, then 2 and so on).
+
+```bash
+$ aws efs create-mount-target --file-system-id fs-f8ae5830 --subnet-id ACQUIRE NEXT? --security-groups ACQUIRE NEXT?
+```
+
+```bash
+$ aws ec2 describe-instances
+{
+    "Reservations": [
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    ...
+                    "KeyName": "kubernetes.kubernetes.backwards.limited-e0:03:a4:2d:58:1b:59:2d:30:57:8f:19:9d:98:2d:4c",
+                    ...
+                    "SubnetId": "subnet-0b8925bde7cb9a30a",
+                    ...
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "nodes.kubernetes.backwards.limited",
+                            "GroupId": "sg-07ea722f4a851a0f7"
+                        }
+                    ]
+```
+
+or even better, if you can work out how to use **jq** to query the output!!!
+
+```bash
+$ aws efs create-mount-target --file-system-id fs-f8ae5830 --subnet-id subnet-0b8925bde7cb9a30a --security-groups sg-07ea722f4a851a0f7
+
+{
+    "OwnerId": "890953945913",
+    "MountTargetId": "fsmt-499ac780",
+    "FileSystemId": "fs-f8ae5830",
+    "SubnetId": "subnet-0b8925bde7cb9a30a",
+    "LifeCycleState": "creating",
+    "IpAddress": "172.20.56.33",
+    "NetworkInterfaceId": "eni-00f00d172b303a06c"
+}
+```
+
+...finally copy the above **FileSystemId** into [wordpress-web.yml](wordpress-web.yml) e.g. we replace the following bold text and region information:
+
+server: eu-west-1a.**fs-5714e89e**.efs.eu-west-1.amazonaws.com
+
+And let's go for it:
+
+```bash
+$ kubectl create -f storage.yml
+storageclass "standard" created
+
+$ kubectl create -f pv-claim.yml
+persistentvolumeclaim "db-storage" created
+
+$ kubectl create -f wordpress-secrets.yml
+secret "wordpress-secrets" created
+
+$ kubectl create -f wordpress-db.yml
+replicationcontroller "wordpress-db" created
+
+$ kubectl create -f wordpress-db-service.yml
+service "wordpress-db" created
+
+$ kubectl get pvc
+NAME       STATUS VOLUME                                CAPACITY ACCESS STORAGECLASS
+db-storage Bound  pvc-c93a8d15-e91f-11e8-8362-062325275012 2Gi     RWO    standard
+
+$ kubectl get pods
+NAME                 READY     STATUS    RESTARTS   AGE
+wordpress-db-vcgz2   1/1       Running   0          6m
+
+$ kubectl create -f wordpress-web.yml
+deployment "wordpress-deployment" created
+
+$ kubectl create -f wordpress-web-service.yml
+service "wordpress" created
+```
+
+We can (if desired) create our required dns in AWS Route 53 e.g.
+
+> ![Route 53](docs/images/route53-wordpress.png)
+
+and go to said dns in your browser:
+
+> ![Browser](docs/images/browser.png)
+
+
+
+Saving images in wordpress with EFS volume does not initially work until we hack the command starting wordpress:
+
+```bash
+kubectl edit deploy/wordpress-deployment
+```
+
+Add these lines right after **containers**:
+
+```yaml
+- command:
+	- bash
+	- -c
+	- chown www-data:www-data /var/www/html/wp-content/uploads && docker-entrypoint.sh apache2-foreground
+```
+
+Of course don't forget to bring everything down:
+
+```bash
+$ kops delete cluster kubernetes.backwards.limited
+
+$ kops delete cluster kubernetes.backwards.limited --yes
+```
+
+including manually deleting the EFS:
+
+> ![EFS](docs/images/efs.png)
+
+> ![Delete EFS](docs/images/efs-delete.png)
