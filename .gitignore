@@ -67,6 +67,7 @@ fabric.properties
 !.vscode/launch.json
 !.vscode/extensions.json
 
+target
 .java-version
 node_modules/
 package-lock.json
