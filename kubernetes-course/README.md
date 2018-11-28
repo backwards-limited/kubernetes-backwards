@@ -23,3 +23,11 @@ Following the excellent [The Complete Kubernetes Course](https://www.udemy.com/l
   - [External DNS](apps/app-8/README.md)
 
   - [Volumes](apps/app-9/README.md)
+
+  - [Pod Presets](apps/app-10/README.md)
+
+  - [Stateful Sets](apps/app-11/README.md)
+
+  - [Daemon Sets](apps/app-12/README.md)
+
+  - [Resource Monitoring](apps/app-13/README.md)

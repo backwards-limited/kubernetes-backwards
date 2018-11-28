@@ -3,13 +3,13 @@
 ## Cluster Commands
 
 ```bash
-kops create cluster --name=kubernetes.newtech.academy --state=s3://kops-state-b429b  --zones=eu-west-1a --node-count=2 --node-size=t2.micro  --master-size=t2.micro --dns-zone=kubernetes.newtech.academy
+kops create cluster --name=kubernetes.backwards.limited --state=s3://kops-state-b429b  --zones=eu-west-1a --node-count=2 --node-size=t2.micro  --master-size=t2.micro --dns-zone=kubernetes.backwards.limited
 
-kops update cluster kubernetes.newtech.academy --yes --state=s3://kops-state-b429b
+kops update cluster kubernetes.backwards.limited --yes --state=s3://kops-state-b429b
 
-kops delete cluster --name kubernetes.newtech.academy --state=s3://kops-state-b429b
+kops delete cluster --name kubernetes.backwards.limited --state=s3://kops-state-b429b
 
-kops delete cluster --name kubernetes.newtech.academy --state=s3://kops-state-b429b --yes
+kops delete cluster --name kubernetes.backwards.limited --state=s3://kops-state-b429b --yes
 ```
 
 ## Docker Commands 
@@ -90,6 +90,9 @@ kubectl rollout undo deployment/helloworld-deployment
 
 Rollback to any version version:
 kubectl rollout undo deployment/helloworld-deployment --to-revision=n
+
+Delete:
+kubectl delete pods --all
 ```
 
 ## AWS Commands

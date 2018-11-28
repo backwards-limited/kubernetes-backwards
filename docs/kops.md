@@ -190,4 +190,3 @@ kops delete cluster kubernetes.backwards.limited --state=s3://kops-my-kubernetes
 
 kops delete cluster kubernetes.backwards.limited --state=s3://kops-my-kubernetes --yes
 ```
-

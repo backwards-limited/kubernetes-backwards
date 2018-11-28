@@ -18,6 +18,7 @@ brew install awscli
 brew install jq
 brew install kubernetes-cli
 brew install kubectl
+brew install kubernetes-helm
 brew install kops
 brew cask install virtualbox
 brew cask install docker

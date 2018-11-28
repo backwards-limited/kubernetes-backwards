@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-1
+spec:
+  replicas: 3
+  revisionHistoryLimit: 100
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: hello-nodejs
+          image: davidainslie/hello-nodejs
+          ports:
+            - name: nodejs-port
+              containerPort: 3000
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 250m    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-2
+spec:
+  replicas: 3
+  revisionHistoryLimit: 100
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: hello-nodejs
+          image: davidainslie/hello-nodejs
+          ports:
+            - name: nodejs-port
+              containerPort: 3000
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 250m    
