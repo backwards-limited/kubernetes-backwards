@@ -23,3 +23,5 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
 - Courses
 
   - [The Complete Kubernetes Course](kubernetes-course/README.md)
+  
+  - [Docker and Kubernetes The Complete Course](docker-kubernetes-complete-course/README.md)
