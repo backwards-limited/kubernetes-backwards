@@ -26,4 +26,5 @@ brew cask install minikube
 brew cask install vagrant
 brew cask install vagrant-manager
 brew install httpie
+brew install node
 ```

@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  redis-server:
+    image: redis
+
+  node-app:
+    build: . # i.e. look for Dockerfile in current directory instead of pulling an image
+    ports:
+      - 4001:8081
+    restart: on-failure
