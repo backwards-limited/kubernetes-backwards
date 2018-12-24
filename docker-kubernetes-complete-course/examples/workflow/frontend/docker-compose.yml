@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  web:
+    build:
+      context: . # The current folder - or we could stipulate some folder e.g. mymodule
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    restart: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app

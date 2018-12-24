@@ -114,3 +114,83 @@ Compiling...
 Compiled successfully!
 ```
 
+## Docker Compose - Avoids Long Docker Run Command
+
+Let's translate the following to docker compose:
+
+```bash
+$ docker run -p 3000:3000 -v /app/node_modules -v `pwd`:/app davidainslie/workflow-example
+```
+
+```yaml
+version: "3"
+
+services:
+  web:
+    build:
+    	context: . # The current folder - or we could stipulate some folder e.g. mymodule
+    	dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+    restart: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app
+```
+
+```bash
+$ docker-compose up
+Creating network "frontend_default" with the default driver
+Building web
+...
+Creating frontend_web_1 ... done
+Attaching to frontend_web_1
+...
+web_1  | You can now view frontend in the browser.
+web_1  |
+web_1  |   Local:            http://localhost:3000/
+web_1  |   On Your Network:  http://172.18.0.2:3000/
+...
+```
+
+## Test
+
+We can run tests inside the container by overriding the default command:
+
+```bash
+$ docker run -it davidainslie/workflow-example npm test
+ PASS  src/App.test.js
+  ✓ renders without crashing (19ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        1.121s
+Ran all test suites.
+
+Watch Usage
+ › Press f to run only failed tests.
+ › Press o to only run tests related to changed files.
+ › Press q to quit watch mode.
+ › Press t to filter by a test name regex pattern.
+ › Press p to filter by a filename regex pattern.
+ › Press Enter to trigger a test run.
+```
+
+However, once again if we changed test code this will not be reflected in the running container.
+
+We could run docker compose which has volume mappings and then attach to the instantiated container to run our tests and because of the volume mappings, any test changes will be shown.
+
+```bash
+$ docker-compose up
+```
+
+```bash
+$ docker ps
+CONTAINER ID   IMAGE          COMMAND         PORTS                    NAMES
+b82f177de492   frontend_web  "npm run start"  0.0.0.0:3000->3000/tcp   frontend_web_1
+
+$ docker exec -it b82f177de492 npm test
+```
+
+Let's take a slightly better approach by adding a second test service to our docker-compose.
