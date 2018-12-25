@@ -11,3 +11,13 @@ services:
     volumes:
       - /app/node_modules
       - .:/app
+
+  # This container runs tests and reruns whenever test code has changed because of volume mappings
+  web-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ["npm", "test"]

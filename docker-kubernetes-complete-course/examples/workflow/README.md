@@ -193,4 +193,85 @@ b82f177de492   frontend_web  "npm run start"  0.0.0.0:3000->3000/tcp   frontend_
 $ docker exec -it b82f177de492 npm test
 ```
 
-Let's take a slightly better approach by adding a second test service to our docker-compose.
+Let's take a slightly better approach by adding a second test service to our docker-compose. We add the following to our [Dev Dockerfile](Dockerfile.dev):
+
+```yaml
+web-test:
+	build:
+		context: .
+		dockerfile: Dockerfile.dev
+	volumes:
+		- /app/node_modules
+		- .:/app
+	command: ["npm", "test"]
+```
+
+```bash
+$ docker-compose up
+Creating network "frontend_default" with the default driver
+Building web-test
+...
+Successfully built 6034403df841
+Successfully tagged frontend_web-test:latest
+WARNING: Image for service web-test was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.
+Creating frontend_web_1      ... done
+Creating frontend_web-test_1 ... done
+Attaching to frontend_web-test_1, frontend_web_1
+...
+web_1       | Starting the development server...
+web_1       |
+web-test_1  | PASS src/App.test.js
+web-test_1  |   ✓ renders without crashing (28ms)
+web-test_1  |
+web-test_1  | Test Suites: 1 passed, 1 total
+web-test_1  | Tests:       1 passed, 1 total
+web-test_1  | Snapshots:   0 total
+web-test_1  | Time:        2.11s
+web-test_1  | Ran all test suites.
+web-test_1  |
+web_1       | Compiled successfully!
+web_1       |
+web_1       | You can now view frontend in the browser.
+web_1       |
+web_1       |   Local:            http://localhost:3000/
+web_1       |   On Your Network:  http://172.18.0.2:3000/
+```
+
+## Build Production Version of App - Multi Step Docker Build
+
+> ![Development environment](docs/images/development-environment.png)
+
+> ![Production environment](docs/images/production-environment.png)
+
+Let's choose [nginx](https://www.nginx.com):
+
+> ![Production nginx environment](docs/images/production-nginx-environment.png)
+
+[Dockerfile](Dockerfile) will now be our main/production dockerfile:
+
+> ![Dockerfile production](docs/images/dockerfile-production.png)
+
+> ![Dockerfile production plan](docs/images/dockerfile-production-plan.png)
+
+where the above translates into [Dockerfile](Dockerfile):
+
+```dockerfile
+FROM node:alpine as builder
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx
+COPY --from=builder /app/build /usr/share/nginx/html
+```
+
+```bash
+$ docker build -t davidainslie/workflow-example .
+```
+
+```bash
+$ docker run -p 8080:80 davidainslie/workflow-example
+```
+
