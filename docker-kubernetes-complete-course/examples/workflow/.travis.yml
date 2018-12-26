@@ -1,0 +1,23 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker build -t davidainslie/dev-workflow-example -f Dockerfile.dev .
+
+script:
+  - docker run davidainslie/dev-workflow-example npm run test -- --coverage
+
+deploy:
+  provider: elasticbeanstalk
+  region: "eu-west-1"
+  app: "dev-workflow-example"
+  env: "DevWorkflowExample-env"
+  bucket_name: "elasticbeanstalk-eu-west-1-890953945913"
+  bucker_path: "dev-workflow-example"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY

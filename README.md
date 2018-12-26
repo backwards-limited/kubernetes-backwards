@@ -2,7 +2,9 @@
 
 Kubernetes functionality showing example usage while covering Kubernetes courses, such as:
 
-- [The Complete Kubernetes Course](www.udemy.com/learn-devops-the-complete-kubernetes-course)
+- [The Complete Kubernetes Course](https://www.udemy.com/learn-devops-the-complete-kubernetes-course)
+
+- [Docker and Kubernetes The Complete Course](https://www.udemy.com/docker-and-kubernetes-the-complete-guide)
 
 ## Table of Contents
 
