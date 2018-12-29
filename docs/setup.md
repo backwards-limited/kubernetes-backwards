@@ -27,4 +27,5 @@ brew cask install vagrant
 brew cask install vagrant-manager
 brew install httpie
 brew install node
+npm install -g create-react-app
 ```
