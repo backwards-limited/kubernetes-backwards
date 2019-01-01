@@ -38,7 +38,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.listen(5000, err => {
-  console.log("Listening");
+  console.log("API listening");
 });
 
 app.get("/", (req, res) => {
