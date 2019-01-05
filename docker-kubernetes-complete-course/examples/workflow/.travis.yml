@@ -15,7 +15,7 @@ deploy:
   app: "dev-workflow-example"
   env: "DevWorkflowExample-env"
   bucket_name: "elasticbeanstalk-eu-west-1-890953945913"
-  bucker_path: "dev-workflow-example"
+  bucket_path: "dev-workflow-example"
   on:
     branch: master
   access_key_id: $AWS_ACCESS_KEY
