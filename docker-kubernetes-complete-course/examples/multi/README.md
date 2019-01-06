@@ -379,3 +379,38 @@ Finally we can add **deploy** to [.travis.yml](.travis.yml). Note, we'll need to
 
 > ![Bucket](docs/images/s3-bucket.png)
 
+## Test Deployment
+
+If there are any errors, check out the logs:
+
+> ![Check logs](docs/images/check-logs.png)
+
+> ![Logs](docs/images/logs.png)
+
+To view our application click the generated link:
+
+> ![Click link](docs/images/click-link.png)
+
+## Teardown Resources
+
+Teardown Elastic Beanstalk instance:
+
+> ![Delete EB](docs/images/delete-eb.png)
+
+Next we'll teardown the RDS instance:
+
+> ![Teardown RDS](docs/images/teardown-rds.png)
+
+> ![Confirm delete RDS](docs/images/confirm-delete-rds.png)
+
+And teardown Elasticache:
+
+> ![Teardown Redis](docs/images/teardown-redis.png)
+
+Finally, we can remove the security group we set up for these services:
+
+> ![Delete security groups](docs/images/delete-security-groups.png)
+
+And just to be ultra efficient, let's remove the IAM keys we set up:
+
+> ![Delete user](docs/images/delete-user.png)

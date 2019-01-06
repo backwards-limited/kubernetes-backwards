@@ -14,6 +14,12 @@
 
 - [Docker Tag](docs/docker-tag.md)
 
+- [Kubernetes](docs/kubernetes.md)
+
+- [Kubernetes Setup](docs/kubernetes-setup.md)
+
+- [Minikube](docs/minikube.md)
+
 - Examples
 
   - [Web App in Container](examples/nodejs/README.md)
