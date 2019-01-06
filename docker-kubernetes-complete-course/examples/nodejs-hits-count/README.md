@@ -1,7 +1,7 @@
 # Web App in Container with Docker Compose
 
 > ![App](docs/images/app.png)
-
+---
 > ![App containers](docs/images/app-containers.png)
 
 ```bash
@@ -25,7 +25,7 @@ end note
 ```
 
 > ![Docker compose structure](docs/images/docker-compose-structure.png)
-
+---
 > ![Docker compose up](docs/images/docker-compose-up.png)
 
 ```bash
@@ -163,4 +163,3 @@ Name                              Command                    State Ports
 nodejs-hits-count_node-app_1      npm start                     Up 0.0.0.0:4001->8081/tcp
 nodejs-hits-count_redis-server_1  docker-entrypoint.sh redis... Up 6379/tcp
 ```
-

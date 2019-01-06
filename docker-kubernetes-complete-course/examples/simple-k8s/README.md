@@ -7,7 +7,7 @@ We want to take our original [multi-client](../multi/README.md) image that we we
 From our two config files [client-pod.yml](client-pod.yml) and [client-node-port.yml](client-node-port.yml) what is **kind** and **apiVersion**?
 
 > ![Config](docs/images/config.png)
-
+---
 > ![Version](docs/images/version.png)
 
 ## Pod
@@ -27,9 +27,9 @@ When we start up Minikube for example, a Virtual Machine is instantiated, which 
 In our [example](client-node-port.yml) the "sub type" of Service we declared is **NodePort**, i.e. a NodePort Service. All of the sub types of Service expose containers. However, a NodePort is only for **development** purposes, though it does expose its container to the outside world.
 
 > ![Multi client example](docs/images/multi-client-example.png)
-
+---
 > ![Multi client example details](docs/images/multi-client-example-details.png)
-
+---
 > ![Ports](docs/images/ports.png)
 
 # Deploy / Run

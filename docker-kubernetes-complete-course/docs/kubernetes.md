@@ -29,5 +29,5 @@ And so, what is and why use Kubernetes?
 ## Working with Kubernetes
 
 > ![Working with Kubernetes](images/working-with-kubernetes.png)
-
+---
 > ![Local Kubernetes](images/local-kubernetes.png)

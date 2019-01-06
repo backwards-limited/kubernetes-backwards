@@ -1,7 +1,7 @@
 # Deployment Workflow
 
 > ![Workflow](images/workflow.png)
-
+---
 > ![Summary](images/summary.png)
 
 ## Imperative / Declarative
@@ -11,7 +11,7 @@
 ## Imperative
 
 > ![Imperative](images/imperative.png)
-
+---
 > ![Imperative complex](images/imperative-complex.png)
 
 ## Declarative

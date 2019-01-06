@@ -1,7 +1,7 @@
 # Development Workflow - Dev to AWS Prod
 
 > ![Workflow](docs/images/workflow.png)
-
+---
 > ![Pull request](docs/images/workflow-travis-aws.png)
 
 ## Application for our Pipeline
@@ -240,7 +240,7 @@ web_1       |   On Your Network:  http://172.18.0.2:3000/
 ## Build Production Version of App - Multi Step Docker Build
 
 > ![Development environment](docs/images/development-environment.png)
-
+---
 > ![Production environment](docs/images/production-environment.png)
 
 Let's choose [nginx](https://www.nginx.com):
@@ -250,7 +250,7 @@ Let's choose [nginx](https://www.nginx.com):
 [Dockerfile](Dockerfile) will now be our main/production dockerfile:
 
 > ![Dockerfile production](docs/images/dockerfile-production.png)
-
+---
 > ![Dockerfile production plan](docs/images/dockerfile-production-plan.png)
 
 where the above translates into [Dockerfile](Dockerfile):
@@ -278,9 +278,9 @@ $ docker run -p 8080:80 davidainslie/workflow-example
 ## Github
 
 > ![Github](docs/images/github.png)
-
+---
 > ![Github new repo](docs/images/github-new-repo.png)
-
+---
 > ![Github repo](docs/images/github-repo.png)
 
 ```bash
@@ -318,11 +318,11 @@ What we want to tell travis using [.travis.yml](.travis.yml):
 We'll deploy to Elastic Beanstalk:
 
 > ![Elastic beanstalk](docs/images/aws-elastic-beanstalk.png)
-
+---
 > ![Elastic beanstalk setup 1](docs/images/aws-elastic-beanstalk-1.png)
-
+---
 > ![Elastic beanstalk setup 2](docs/images/aws-elastic-beanstalk-2.png)
-
+---
 > ![Elastic beanstalk setup 3](docs/images/aws-elastic-beanstalk-3.png)
 
 And what Elastic Beanstalk essentials gives us:
@@ -340,31 +340,31 @@ The way we setup Beanstalk, there is a sample application deployed - just naviga
 Wherever we are deploying to (AWS in this case), [.travis.yml](.travis.yml) needs the necessary configuration. Here are some screenshots of where the configurations were found in AWS:
 
 > ![Elastic beanstalk configurations](docs/images/aws-elastic-beanstalk-configurations.png)
-
+---
 > ![Get to S3](docs/images/aws-get-to-s3.png)
-
+---
 > ![S3](docs/images/aws-s3.png)
 
 Of course we need access keys. I'm going to reuse one of my keys, but you can always generate new:
 
 > ![AWS IAM](docs/images/aws-iam.png)
-
+---
 > ![AWS IAM user](docs/images/aws-iam-user.png)
-
+---
 > ![AWS IAM policy](docs/images/aws-iam-policy.png)
-
+---
 > ![AWS IAM beanstalk](docs/images/aws-iam-beanstalk.png)
 
 Do not add the keys directly to the travis configuration. Add them as environment variables. In travis-ci:
 
 > ![Travis env](docs/images/travis-env.png)
-
+---
 > ![Travis AWS secrets](docs/images/travis-aws-secrets.png)
 
 Upon a travis deployment, we can go ahead and check AWS:
 
 > ![AWS deployment](docs/images/aws-deployment.png)
-
+---
 > ![AWS deployed via travis](docs/images/aws-deployed-via-travis.png)
 
 And the clicking the generated **URL** gives:

@@ -1,11 +1,11 @@
 # Web App in Container
 
 > ![Web app in container](docs/images/web-app.png)
-
+---
 > ![Web app steps](docs/images/web-app-steps.png)
-
+---
 > ![Nodejs basics](docs/images/nodejs-basics.png)
-
+---
 > ![Dockerfile flow](docs/images/dockerfile-flow.png)
 
 ## Build and Run
@@ -40,7 +40,7 @@ Of course, we won't be able to actually access the application from outside the 
 With port mapping (a runtime contraint) we can have:
 
 > ![With port mapping](docs/images/with-port-mapping.png)
-
+---
 > ![Port mapping](docs/images/port-mapping.png)
 
 ```bash
@@ -122,4 +122,3 @@ total 48
     16 -rw-r--r--    1 root     root         13047 Dec 22 14:41 package-lock.json
      4 -rw-r--r--    1 root     root            96 Dec 22 14:41 package.json
 ```
-

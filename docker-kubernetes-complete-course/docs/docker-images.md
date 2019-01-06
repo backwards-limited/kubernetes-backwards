@@ -1,7 +1,7 @@
 # Docker Images
 
 > ![Create docker image](images/create-docker-image.png)
-
+---
 > ![Create dockerfile](images/create-docker-file.png)
 
 ## Example - Create Image That Runs Redis Server
@@ -25,7 +25,7 @@ The Dockerfile essentials are:
 ## Dockerfile Introduction
 
 > ![Dockerfile step 1](images/dockerfile-step1.png)
-
+---
 > ![Dockerfile step 2](images/dockerfile-step2.png)
 
 ## Manual
@@ -62,4 +62,3 @@ $ docker run 998e82ae5c6e177c
 ...
 1:M 20 Dec 21:40:49.680 * Ready to accept connections
 ```
-

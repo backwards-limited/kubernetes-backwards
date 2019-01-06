@@ -74,7 +74,7 @@ hi there
 and what is the difference? Of course, **stop** is more graceful:
 
 > ![Docker stop](images/docker-stop.png)
-
+---
 > ![Docker kill](images/docker-kill.png)
 
 ```bash

@@ -1,7 +1,7 @@
 # Docker Basics
 
 > ![Containers](images/containers.png)
-
+---
 > ![Docker](images/docker.png)
 
 ## Example - *docker run hello-world*
@@ -19,13 +19,13 @@ Now what if 2 of our processes (in a crazy world) need different versions of Pyt
 A crazy solution (for our crazy world) could you the idea of **namespacing**:
 
 > ![Namespacing](images/namespacing.png)
-
+---
 > ![Namespacing overview](images/namespacing-overview.png)
 
 Thinking **virtually** we view the above as a **container**:
 
 > ![View as container](images/view-as-container.png)
-
+---
 > ![Image to container](images/image-to-container.png)
 
 which you can image as translated to:
