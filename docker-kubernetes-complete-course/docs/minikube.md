@@ -19,7 +19,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ## Multi Client Image Running on Local Kubernetes
 
-We'll take the [service/image](../../examples/multi/README.md) we set up previously:
+We'll take the [multi-client image](../examples/multi/README.md) we set up previously:
 
 > ![Docker compose to Kubernetes](images/docker-compose-to-kubernetes.png)
 
@@ -27,3 +27,4 @@ We'll take the [service/image](../../examples/multi/README.md) we set up previou
 
 > ![Docker Compose Kubernetes mapping 2](images/docker-compose-kubernetes-mapping-2.png)
 
+The necessary files are in the example: [simple-k8s](../examples/simple-k8s/README.md)

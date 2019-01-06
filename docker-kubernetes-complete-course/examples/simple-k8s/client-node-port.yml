@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-node-port
+spec:
+  type: NodePort
+  ports:
+    - port: 3050       # Exposed for any other Pod to access this "multi-client" service
+      targetPort: 3000 # Exposed by Pod
+      nodePort: 31515  # If not specified, a random one is assinged between 30000 - 32767
+  selector:
+    component: web

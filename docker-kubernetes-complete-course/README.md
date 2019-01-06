@@ -2,23 +2,29 @@
 
 ## Table of Contents
 
-- [Docker Introduction](docs/docker-introduction.md)
+- Docker
 
-- [Docker Run](docs/docker-run.md)
+  - [Docker Introduction](docs/docker-introduction.md)
 
-- [Docker Logs](docs/docker-logs.md)
+  - [Docker Run](docs/docker-run.md)
 
-- [Docker Exec](docs/docker-exec.md)
+  - [Docker Logs](docs/docker-logs.md)
 
-- [Docker Images](docs/docker-images.md)
+  - [Docker Exec](docs/docker-exec.md)
 
-- [Docker Tag](docs/docker-tag.md)
+  - [Docker Images](docs/docker-images.md)
 
-- [Kubernetes](docs/kubernetes.md)
+  - [Docker Tag](docs/docker-tag.md)
 
-- [Kubernetes Setup](docs/kubernetes-setup.md)
+- Kubernetes
+- 
+  - [Kubernetes](docs/kubernetes.md)
 
-- [Minikube](docs/minikube.md)
+  - [Kubernetes Setup](docs/kubernetes-setup.md)
+
+  - [Minikube](docs/minikube.md)
+
+  - [Deployment Workflow](docs/workflow.md)
 
 - Examples
 
@@ -29,3 +35,5 @@
   - [Development Workflow - Dev to AWS Prod](examples/workflow/README.md)
 
   - [Multi Container App](examples/multi/README.md)
+
+  - [Simple k8s](examples/simple-k8s/README.md)
