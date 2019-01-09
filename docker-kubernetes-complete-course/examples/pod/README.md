@@ -1,4 +1,4 @@
-# Simple k8s
+# Pod
 
 We want to take our original [multi-client](../multi/README.md) image that we were working on using Docker and Docker Compose, and now use Kubernetes. For this example, we will feed into **kubectl** two config files that *create objects*.
 
@@ -9,8 +9,6 @@ From our two config files [client-pod.yml](client-pod.yml) and [client-node-port
 > ![Config](docs/images/config.png)
 ---
 > ![Version](docs/images/version.png)
-
-## Pod
 
 So what is a **pod**?
 
@@ -88,3 +86,96 @@ $ minikube ip
 ```
 
 and now we can navigate to the multi-client UI at http://192.168.99.101:31515
+
+## Update Existing Objects
+
+> ![Update existing objects](docs/images/update-existing-objects.png)
+
+---
+
+> ![Update approaches](docs/images/update-approaches.png)
+
+---
+
+> ![Update config](docs/images/update-config.png)
+
+We simply change the image and reapply:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-pod
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client
+      image: davidainslie/multi-client
+      ports:
+        - containerPort: 3000
+      resources:
+        limits:
+          memory: 256Mi
+          cpu: 250m
+```
+
+becomes:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-pod
+  labels:
+    component: web
+spec:
+  containers:
+    - name: client
+      image: davidainslie/multi-worker
+      ports:
+        - containerPort: 3000
+      resources:
+        limits:
+          memory: 256Mi
+          cpu: 250m
+```
+
+```bash
+$ kubectl apply -f client-pod-updated.yml
+pod "client-pod" configured
+
+$ kubectl get pods
+NAME         READY     STATUS              RESTARTS   AGE
+client-pod   0/1       ContainerCreating   0          4m
+```
+
+> ![Describe object](docs/images/describe-object.png)
+
+```bash
+$ kubectl describe pod client-pod
+Name:               client-pod
+Namespace:          default
+...
+Containers:
+  client:
+    Container ID:   docker://3459d093c534f64613214a1c5605bd186e895ed35a10a4bed9f4c9473e788fd8
+    Image:          davidainslie/multi-worker
+...
+```
+
+Note that updating entries within a Pod's declaration are fairly limited.
+
+> ![Pod update](docs/images/pod-update.png)
+
+## Object Types
+
+> ![Object types](docs/images/object-types.png)
+
+---
+
+> ![Pod vs deployment](docs/images/pod-vs-deployment.png)
+
+---
+
+> ![Deployment basics](docs/images/deployment-basics.png)

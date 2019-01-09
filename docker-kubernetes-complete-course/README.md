@@ -26,14 +26,22 @@
 
   - [Deployment Workflow](docs/workflow.md)
 
+  - [Cheatsheet](docs/kubernetes-cheatsheet.md)
+
 - Examples
 
-  - [Web App in Container](examples/nodejs/README.md)
-  
-  - [Web App in Container with Docker Compose](examples/nodejs-hits-count/README.md)
+  - Docker
 
-  - [Development Workflow - Dev to AWS Prod](examples/workflow/README.md)
+    - [Web App in Container](examples/nodejs/README.md)
 
-  - [Multi Container App](examples/multi/README.md)
+    - [Web App in Container with Docker Compose](examples/nodejs-hits-count/README.md)
 
-  - [Simple k8s](examples/simple-k8s/README.md)
+    - [Development Workflow - Dev to AWS Prod](examples/workflow/README.md)
+
+    - [Multi Container App](examples/multi/README.md)
+
+  - Kubernetes
+
+    - [Pod](examples/pod/README.md)
+
+    - [Deployment](examples/deployment/README.md)
