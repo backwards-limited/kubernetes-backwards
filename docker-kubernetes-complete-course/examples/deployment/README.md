@@ -147,3 +147,32 @@ Three possible solutions.
 ---
 
 > ![New version deployed solution 3](docs/images/new-version-deployed-solution-3.png)
+
+Let's:
+
+- Tag the image with a version number and push to dockerhub
+- Run a **kubectl** command forcing the deployment to use the new image version
+
+Within [multi client directory](../multi/client):
+
+```bash
+multi/client on master [!] is 📦 v0.1.0 via ⬢ v8.9.4 on 🐳 v18.09.0 at ☸️ minikube
+$ docker build -t davidainslie/multi-client:v2 .
+...
+Successfully built 8146771f6322
+Successfully tagged davidainslie/multi-client:v2
+```
+
+```bash
+$ docker push davidainslie/multi-client:v2
+```
+
+> ![Set image](docs/images/set-image.png)
+
+```bash
+$ kubectl set image deployment/client-deployment client=davidainslie/multi-client:v2
+deployment "client-deployment" image updated
+```
+
+> ![Fib version 2](docs/images/fib-v2.png)
+

@@ -45,3 +45,5 @@
     - [Pod](examples/pod/README.md)
 
     - [Deployment](examples/deployment/README.md)
+
+    - [Reconfigure Docker CLI to the VM](examples/reconfigure-docker-cli/README.md)
