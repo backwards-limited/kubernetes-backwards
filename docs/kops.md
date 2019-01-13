@@ -11,12 +11,15 @@ As a sidenote, we could create a virtual Linux environment with **Vagrant** and 
 
 > ![Open IAM in AWS](images/aws-iam-open.png)
 
+---
 
 > ![Open IAM Users](images/aws-iam-users-open.png)
 
+---
 
 > ![IAM Add user](images/aws-iam-add-user.png)
 
+---
 
 > ![IAM New user step 1](images/aws-iam-new-user-1.png)
 
@@ -63,38 +66,41 @@ Time to go back to the AWS console and choose **S3**.
 
 > ![Open AWS S3](images/aws-s3-open.png)
 
-
+---
 
 > ![AWS open create bucket](images/aws-create-bucket-open.png)
 
-
+---
 
 > ![AWS Open Route 53](images/aws-route53-open.png)
-
 
 
 For the next step you need a **domain name** - so just buy one (I know, what a waste of money but for anyone seriously working on this stuff, they should have a domain name).
 
 > ![AWS DNS get started](images/dns-get-started.png)
 
+---
 
 > ![AWS Create hosted zone](images/aws-dns-create.png)
 
+---
 
 > ![AWS Create hosted zone](images/aws-dns-create-hosted-zone.png)
 
+---
 
 > ![AWS hosted zone](images/aws-hosted-zone.png)
-
 
 
 Finally the name server URLs that are generated for us have to be added to whichever **domain name provider** you use. Here is a [1 & 1](https://my.1and1.co.uk) example:
 
 > ![1 & 1 add record](images/1&1-add-record.png)
 
+---
 
 > ![1 & 1 add NS](images/1&1-add-ns.png)
 
+---
 
 > ![1 & 1 Save NS](images/1&1-save-ns.png)
 
@@ -158,18 +164,17 @@ So we have a service deployed and exposed on our cluster.
 To access the service we still have to configure firewall rules in AWS:
 
 
-
 >![AWS View Firewall Rules](images/aws-view-firewall-ruled.png)
 
-
+---
 
 > ![Edit/Add Firewall Rules](images/aws-edit-firewall-rules.png)
 
-
+---
 
 > ![AWS Add Firewall Rule](images/aws-add-firewall-rule.png)
 
-
+---
 
 > ![AWS Instance IP](images/aws-ip.png)
 

@@ -5,6 +5,7 @@ The following screenshots show a Kubernetes cluster being enabled locally with t
 
 > ![Open Docker Client Preferences](images/docker-client-open.png)
 
+---
 
 > ![Docker Client Kubernetes](images/docker-client-kubernetes.png)
 

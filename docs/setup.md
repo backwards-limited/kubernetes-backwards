@@ -13,7 +13,6 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 Install essentials:
 
 ```bash
-brew update
 brew install awscli
 brew install jq
 brew install kubernetes-cli

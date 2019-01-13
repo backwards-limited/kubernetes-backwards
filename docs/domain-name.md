@@ -2,15 +2,15 @@
 
 As already mentioned, for this example we are using [AWS Route 53](https://console.aws.amazon.com/route53/home#Dashboard).
 
-> ![AWS Route 53 hosted zone](docs/images/aws-route53-hosted-zone.png)
+> ![AWS Route 53 hosted zone](images/aws-route53-hosted-zone.png)
 
 We already created a [hosted zone](https://console.aws.amazon.com/route53/home#hosted-zones) and added the generated "name server values" into our domain name provider's portal.
 
-> ![AWS create hosted zone](docs/images/aws-create-hosted-zone.png)
+> ![AWS create hosted zone](images/aws-create-hosted-zone.png)
 
 Now let's check everything is fine:
 
-> ![AWS Hosted Zone](docs/images/aws-hosted-zone.png)
+> ![AWS Hosted Zone](images/aws-hosted-zone.png)
 
 On your Mac command line:
 
