@@ -125,3 +125,42 @@ deployment "server-deployment" unchanged
 deployment "worker-deployment" unchanged
 ```
 
+## Postgres Configuration
+
+We have configurations: [postgres-deployment](k8s/postgres-deployment.yml) and [postgres-cluster-ip-service.yml](k8s/postgres-cluster-ip-service.yml).
+
+## Persistence Volume Claim
+
+> ![Postgres volume](docs/images/postgres-volume.png)
+
+---
+
+> ![Postgres writes](docs/images/postgres-write.png)
+
+---
+
+> ![Postgres crash](docs/images/postgres-crash.png)
+
+---
+
+> ![Postgres persist](docs/images/postgres-persist.png)
+
+---
+
+> ![Postgres pesist survives crash](docs/images/postgres-persist-survives-crash.png)
+
+---
+
+> ![Kubernetes volume](docs/images/kubernetes-volume.png)
+
+---
+
+> ![Volume we want](docs/images/volume-we-want.png)
+
+---
+
+> ![Postgres kubernetes volume](docs/images/postgres-kubernetes-volume.png)
+
+In this case, if the container (in red) dies and blue starts up, it gets any data that was persisted in the volume. However, if the pod dies, then all data is lost.
+
+> ![Volume vs persistent volume](docs/images/volume-vs-persistent-volume.png)

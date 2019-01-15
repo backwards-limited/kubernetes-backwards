@@ -15,3 +15,12 @@ The final command will eventually provide the Url to access the application name
 Upon first run, the image for said application will not be available and will be downloaded from the **gcr.io** repository.
 Note that running an application on a Kubernetes cluster remains "private" to the cluster until it is exposed to the outside world - hence the extra command to expose to "some available port" via **NodePort**.
 (Permanent ports are handled differently).
+
+## Resource Limits
+
+By default, minikube in configured for 1GB of memory and 1 CPU. These can be overridden with **--memory** and **--cpus** e.g.
+
+```bash
+minikube --memory 8192 --cpus 2 start
+```
+
