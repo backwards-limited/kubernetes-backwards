@@ -164,3 +164,86 @@ We have configurations: [postgres-deployment](k8s/postgres-deployment.yml) and [
 In this case, if the container (in red) dies and blue starts up, it gets any data that was persisted in the volume. However, if the pod dies, then all data is lost.
 
 > ![Volume vs persistent volume](docs/images/volume-vs-persistent-volume.png)
+
+---
+
+> ![Kubernetes analogy](docs/images/kubernetes-analogy.png)
+
+Our "advert" of [persistent volume claim](k8s/database-persistent-volume-claim.yml) to attach to a pod configuration:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-persistent-volume-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+```
+By not specifying **storageClassName** we accept the default.
+
+> ![Access modes](docs/images/access-modes.png)
+
+When we attach the persistent volume claim to a pod configuration and hand that over to Kubernetes, then Kubernetes will have to look up an available resource with the given access mode, or dynamically generate one.
+
+So, we hand over the pod configuration to Kubernetes and:
+
+> ![Kubernetes analogy 2](docs/images/kubernetes-analogy-2.png)
+
+---
+
+> ![Kubernetes analogy 3](docs/images/kubernetes-analogy-3.png)
+
+**Checkpoint** - Deploy current configs into Kubernetes:
+
+```bash
+$ kubectl apply -f k8s
+service "client-cluster-ip-service" created
+deployment "client-deployment" created
+persistentvolumeclaim "database-persistent-volume-claim" created
+service "postgres-cluster-ip-service" created
+deployment "postgres-deployment" created
+service "redis-cluster-ip-service" created
+deployment "redis-deployment" created
+service "server-cluster-ip-service" created
+deployment "server-deployment" created
+deployment "worker-deployment" created
+```
+
+```bash
+$ kubectl get pods
+NAME                                   READY     STATUS              RESTARTS   AGE
+client-deployment-6f9788d584-6x4w8     1/1       Running             0          2m
+client-deployment-6f9788d584-jq4hg     1/1       Running             0          2m
+client-deployment-6f9788d584-lmd9f     1/1       Running             0          2m
+postgres-deployment-7b6fd8c755-4dbr9   0/1       Pending             0          2m
+redis-deployment-54c4fdfbd9-2lfzg      1/1       Running             0          2m
+server-deployment-7bfbfd7cc-8kvb9      1/1       Running             0          2m
+server-deployment-7bfbfd7cc-c8qjw      0/1       ContainerCreating   0          2m
+server-deployment-7bfbfd7cc-skbkt      1/1       Running             0          2m
+worker-deployment-86d85bcccb-kg85c     0/1       ContainerCreating   0          2m
+```
+
+```bash
+$ kubectl get pv
+NAME      CAPACITY  ACCESS  RECLAIM POLICY CLAIM                                 STORAGECLASS
+pvc-48... 1Gi       RWO     Delete         default/database-persistent-volume-claim  standard
+```
+
+```bash
+$ kubectl get pvc
+NAME                              VOLUME     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+database-persistent-volume-claim  pvc-48...  1Gi        RWO            standard       5m
+```
+
+## Environment Variables
+
+> ![Envs](docs/images/envs.png)
+
+- Yellow and Red: Constant values
+- White: Sensitive
+
+> ![Redis env](docs/images/redis-env.png)
