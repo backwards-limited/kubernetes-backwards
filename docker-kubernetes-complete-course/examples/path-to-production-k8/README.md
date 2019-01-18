@@ -247,3 +247,125 @@ database-persistent-volume-claim  pvc-48...  1Gi        RWO            standard 
 - White: Sensitive
 
 > ![Redis env](docs/images/redis-env.png)
+
+## Encoded Secret
+
+> ![Secrets](docs/images/secrets.png)
+
+---
+
+> ![Creating a secret](docs/images/creating-a-secret.png)
+
+Types of secret:
+
+- generic
+- docker-registry
+- tls
+
+```bash
+$ kubectl create secret generic pgpassword --from-literal PGPASSWORD=123
+secret "pgpassword" created
+```
+
+```bash
+$ kubectl get secrets
+NAME                  TYPE                                  DATA      AGE
+pgpassword            Opaque                                1         33s
+```
+
+Note that a secret can have many key/value pairs. The following [server-deployment.yml](k8s/server-deployment.yml) shows the use of our secret:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: server
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+        - name: server
+          image: davidainslie/multi-server
+          ports:
+            - containerPort: 5000
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: "6379"
+            - name: PGUSER
+              value: postgres
+            - name: PG_HOST
+              value: postgres-cluster-ip-service
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+```
+
+and again in [postgres-deployment.yml](k8s/postgres-deployment.yml):
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: postgres
+  template:
+    metadata:
+      labels:
+        component: postgres
+    spec:
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: database-persistent-volume-claim
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgpassword
+                  key: PGPASSWORD
+```
+
+**Checkpoint** - Deploy current configs into Kubernetes:
+
+```bash
+$ kubectl apply -f k8s
+service "client-cluster-ip-service" created
+deployment "client-deployment" created
+persistentvolumeclaim "database-persistent-volume-claim" created
+service "postgres-cluster-ip-service" created
+deployment "postgres-deployment" created
+service "redis-cluster-ip-service" created
+deployment "redis-deployment" created
+service "server-cluster-ip-service" created
+deployment "server-deployment" created
+deployment "worker-deployment" created
+```
+
