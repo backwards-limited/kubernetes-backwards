@@ -369,3 +369,135 @@ deployment "server-deployment" created
 deployment "worker-deployment" created
 ```
 
+## Ingress
+
+> ![Ingress service](docs/images/ingress-service.png)
+
+---
+
+> ![Load balanacer](docs/images/load-balancer.png)
+
+A load balancer provides access to one specific set of pods (a deployment), whereas ingress load balanced multiple deployments.
+
+> ![Ingress nginx](docs/images/ingress-nginx.png)
+
+There are several Ingress implementations to choose from, such as a **nginx ingress**.
+
+> ![Ingress nginx note](docs/images/ingress-nginx-note.png)
+
+---
+
+> ![Ingress nginx note 2](docs/images/ingress-nginx-note-2.png)
+
+---
+
+> ![Current to new state](docs/images/current-to-new-state.png)
+
+The **desired state** is declared by our **deployment configuration**. We feed the config to kubectl which in turn Kubernetes creates a deployment object.
+
+> ![Ingress current to new state](docs/images/ingress-current-to-new-state.png)
+
+---
+
+> ![Ingress controller](docs/images/ingress-controller.png)
+
+So we have to create an ingress config (another yml) that stipulates the routing rules. This is fed into kubectl which generates an object called an **ingress controller** - controllers (created from configs) contantly look at the **desired state** as given by a config and compares to the **current state** and makes adjustments to said current state to arrive at the desired state. The ingress controller sets up the necessary infrastructure, and changes accordingly.
+
+We are going to set things up just a tad differently, where we essentially merge the **controller** and **the thing that accepts traffic**:
+
+> ![What we are doing](docs/images/what-we-are-doing.png)
+
+---
+
+> ![Ingress nginx gc](docs/images/ingress-nginx-gc.png)
+
+The **default-backend** is a collection of health checks.
+
+The question at this point is **why not use a load balancer service with custom nginx?**
+
+> ![Why not a custom nginx](docs/images/why-not-custom-nginx.png)
+
+Well, the nginx-controller bypasses cluster IP services and routes traffic directly to pods e.g.
+
+> ![Bypass cluster IP service](docs/images/bypass-cluster-ip-service.png)
+
+This allows for **sticky sessions** and a lot more.
+
+The nginx-controller deployment has the following mandatory step, followed by a step according to the type of Kubernetes cluster such as minikube, docker for Mac, GCP etc.
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+namespace "ingress-nginx" created
+configmap "nginx-configuration" created
+configmap "tcp-services" created
+configmap "udp-services" created
+serviceaccount "nginx-ingress-serviceaccount" created
+clusterrole "nginx-ingress-clusterrole" created
+role "nginx-ingress-role" created
+rolebinding "nginx-ingress-role-nisa-binding" created
+clusterrolebinding "nginx-ingress-clusterrole-nisa-binding" created
+deployment "nginx-ingress-controller" created
+```
+
+And for Minikube:
+
+```bash
+$ minikube addons enable ingress
+ingress was successfully enabled
+```
+
+> ![Traffic rules](docs/images/traffic-rules.png)
+
+With our new [ingress-service.yml](k8s/ingress-service.yml) we can **apply** everything:
+
+```bash
+$ kubectl apply -f k8s
+service "client-cluster-ip-service" unchanged
+deployment "client-deployment" unchanged
+persistentvolumeclaim "database-persistent-volume-claim" unchanged
+ingress "ingress-service" created
+service "postgres-cluster-ip-service" unchanged
+deployment "postgres-deployment" unchanged
+service "redis-cluster-ip-service" unchanged
+deployment "redis-deployment" unchanged
+service "server-cluster-ip-service" unchanged
+deployment "server-deployment" unchanged
+deployment "worker-deployment" unchanged
+```
+
+If you have [kubernetic](https://kubernetic.com/) installed:
+
+> ![Kubernetic](docs/images/kubernetic.png)
+
+```bash
+$ minikube ip
+192.168.99.115
+```
+
+Upon opening up our browser (and depending on the browser) we'll receive a warning:
+
+> ![Browser warning](docs/images/browser-warning.png)
+
+But we can proceed:
+
+> ![Browser warning ignored](docs/images/browser-warning-accepted.png)
+
+---
+
+> ![Browser certificate popup](docs/images/browser-certificate-popup.png)
+
+---
+
+> ![Browser certificate](docs/images/browser-certificate.png)
+
+## Minikube Dashboard
+
+```bash
+$ minikube dashboard
+Enabling dashboard ...
+Verifying dashboard health ...
+Launching proxy ...
+Verifying proxy health ...
+Opening http://127.0.0.1:54483/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/ in your default browser...
+```
+
