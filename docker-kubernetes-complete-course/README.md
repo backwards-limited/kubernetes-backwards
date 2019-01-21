@@ -49,3 +49,5 @@
     - [Reconfigure Docker CLI to the VM](examples/reconfigure-docker-cli/README.md)
 
     - [Path to Production](examples/path-to-production-k8s/README.md)
+
+    - [Production](examples/production/README.md)
