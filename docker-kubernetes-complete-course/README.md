@@ -50,4 +50,4 @@
 
     - [Path to Production](examples/path-to-production-k8s/README.md)
 
-    - [Production](https://github.com/davidainslie/multi-k8s)
+    - [Production](https://github.com/backwards-limited/kubernetes-backwards-gcp-example)
