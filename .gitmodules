@@ -1,0 +1,3 @@
+[submodule "docker-kubernetes-complete-course/examples/production"] 
+  path = docker-kubernetes-complete-course/examples/production 
+  url = git://https://github.com/backwards-limited/kubernetes-backwards
