@@ -6,6 +6,8 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
 
 - [Docker and Kubernetes The Complete Course](https://www.udemy.com/docker-and-kubernetes-the-complete-guide)
 
+- [Kubernetes Microservices](https://www.udemy.com/kubernetes-microservices)
+
 ## Table of Contents
 
 - [Setup](docs/setup.md)
@@ -27,3 +29,5 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
   - [The Complete Kubernetes Course](kubernetes-course/README.md)
   
   - [Docker and Kubernetes The Complete Course](docker-kubernetes-complete-course/README.md)
+
+  - [Kubernetes Microservices](kubernetes-microservices/README.md)
