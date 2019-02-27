@@ -5,3 +5,5 @@
 - [Introduction](docs/introduction.md)
   
 - [Pods](docs/pods.md)
+
+- [Services](docs/services.md)

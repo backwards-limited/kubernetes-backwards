@@ -24,7 +24,7 @@ NAME             TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 svc/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   35d
 ```
 
-In directory [k8s](k8s):
+In directory [k8s](../k8s):
 
 ```bash
 $ kubectl apply -f first-pod.yml
@@ -93,3 +93,4 @@ $ / # cat index.html
 </html>
 ```
 
+So finally note - Pods are not accessible from outside a Kubernetes cluster, which is the job of the **service**.
