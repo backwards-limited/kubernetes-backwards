@@ -31,6 +31,8 @@ We choose from:
 
 ## Deploy Everything
 
+#### 1. Webapp
+
 Within the [k8s](../k8s) directory:
 
 ```bash
@@ -206,3 +208,64 @@ svc/fleetman-webapp   NodePort    10.101.92.103   <none>        8081:30080/TCP  
 svc/kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP          58m       component=apiserver,provider=kubernetes
 ```
 
+#### 2. Queue
+
+When a queue service is also deployed we see said extra service:
+
+```bash
+$ kubectl apply -f .
+pod "queue" created
+service "fleetman-queue" created
+pod "webapp" created
+pod "webapp-release-0-5" created
+service "fleetman-webapp" created
+```
+
+```bash
+$ kubectl get all
+NAME                    READY     STATUS    RESTARTS   AGE
+po/queue                1/1       Running   0          30s
+po/webapp               1/1       Running   0          30s
+po/webapp-release-0-5   1/1       Running   0          30s
+
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+svc/fleetman-queue    NodePort    10.108.243.190   <none>        8161:30010/TCP   30s
+svc/fleetman-webapp   NodePort    10.108.223.166   <none>        8081:30080/TCP   30s
+svc/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP          2d
+```
+
+```bash
+$ kubectl describe pod queue
+Name:               queue
+Namespace:          default
+...
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  1m    default-scheduler  Successfully assigned default/queue to minikube
+  Normal  Pulled     1m    kubelet, minikube  Container image "richardchesterwood/k8s-fleetman-queue:release1" already present on machine
+  Normal  Created    1m    kubelet, minikube  Created container
+  Normal  Started    1m    kubelet, minikube  Started container
+```
+
+And check for the availability of ActiveMQ:
+
+```bash
+$ minikube ip
+192.168.99.119
+```
+
+and navigate to [http://192.168.99.119:30010](http://192.168.99.119:30010):
+
+> ![ActiveMQ](images/activemq.png)
+
+#### Forget pods
+
+Eh! What? Currently our services essentially point at pods via selectors. However, it is better to use deployments instead of pod manifests. But we'll start with replicasets. Before we archive our current manifests, let's just see what happens to our service when the underlying pod dies:
+
+```bash
+$ kubectl delete pod webapp-release-0-5
+pod "webapp-release-0-5" deleted
+```
+
+> ![Deleted pod](images/deleted-pod.png)

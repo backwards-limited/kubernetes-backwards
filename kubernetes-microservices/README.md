@@ -7,3 +7,5 @@
 - [Pods](docs/pods.md)
 
 - [Services](docs/services.md)
+
+- [ReplicaSets](docs/replicasets.md)

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Unique key of the Service instance
+  name: fleetman-webapp
+spec:
+  # Create a HA proxy in the cloud provider with an external IP address (only supported by some cloud providers)
+  type: NodePort
+  ports:
+    # Accept traffic sent to port 8081 (which forwards to 80 exposed by container)
+    - name: http
+      # Without the following for "type: NodePort" and random is selected
+      nodePort: 30080
+      port: 8081
+      targetPort: 80
+  selector:
+    # Load balance traffic across Pods matching this label selector
+    app: webapp
+    release: "0-5"
