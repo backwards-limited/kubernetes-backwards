@@ -9,3 +9,5 @@
 - [Services](docs/services.md)
 
 - [ReplicaSets](docs/replicasets.md)
+
+- [Deployments](docs/deployments.md)
