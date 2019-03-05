@@ -11,3 +11,5 @@
 - [ReplicaSets](docs/replicasets.md)
 
 - [Deployments](docs/deployments.md)
+
+- [Networking & Service Discovery](docs/networking.md)
