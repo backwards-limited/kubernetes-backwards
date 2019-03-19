@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  minReadySeconds: 10 # For demonstration purposes
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webapp
+  template: # Template for the pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+        - name: webapp
+          image: richardchesterwood/k8s-fleetman-webapp-angular:release0
+          resources:
+            limits:
+              memory: 384Mi
+              cpu: 250m

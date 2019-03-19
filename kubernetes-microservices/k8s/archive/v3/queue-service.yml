@@ -5,12 +5,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: http
-      nodePort: 30010
+    - nodePort: 30010
       port: 8161
       targetPort: 8161
-    
-    - name: endpoint
-      port: 61616 # We don't need a nodePort, as this will not be exposed to outside world
   selector:
     app: queue
