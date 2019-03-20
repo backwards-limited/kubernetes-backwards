@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: queue
+  name: api-gateway
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: queue
+      app: api-gateway
   template: # Template for the pods
     metadata:
       labels:
-        app: queue
+        app: api-gateway
     spec:
       containers:
-        - name: queue
-          image: richardchesterwood/k8s-fleetman-queue:release1
+        - name: api-gateway
+          image: richardchesterwood/k8s-fleetman-api-gateway:release1
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: production-microservice          
+              value: production-microservice
           resources:
             limits:
               memory: 384Mi

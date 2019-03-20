@@ -76,3 +76,61 @@ $ kubectl apply -f position-simulator-deployment.yml
 deployment "position-simulator" created
 ```
 
+And we could **follow** the pods logs:
+
+```bash
+$ kubectl logs -f po/position-simulator-dd6fb5b58-g7gjn
+```
+
+And we should see messages:
+
+![Messages](images/messages.png)
+
+**And Then the Position Tracker**:
+
+```bash
+$ kubectl apply -f position-tracker-deployment.yml
+deployment "position-tracker" created
+
+$ kubectl apply -f position-tracker-service.yml
+service "fleetman-position-tracker" created
+```
+
+And we'll see:
+
+![We'll see](images/messages-dequeued.png)
+
+```bash
+$ http http://192.168.99.119:30020/vehicles/City%20Truck
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 20 Mar 2019 22:26:37 GMT
+Transfer-Encoding: chunked
+
+{
+    "lat": 53.37233807891607,
+    "longitude": -1.485841115936637,
+    "name": "City Truck",
+    "speed": 0.7703012847622401,
+    "timestamp": "2019-03-20T22:25:50.891+0000"
+}
+```
+
+**And now the API Gateway**:
+
+```bash
+$ kubectl apply -f api-gateway-deployment.yml
+
+$ kubectl apply -f api-gateway-service.yml
+```
+
+```bash
+$ http 192.168.99.119:30020
+HTTP/1.1 200
+Content-Length: 59
+Content-Type: text/plain;charset=UTF-8
+Date: Wed, 20 Mar 2019 23:29:39 GMT
+
+<p>Fleetman API Gateway at Wed Mar 20 23:29:39 GMT 2019</p>
+```
+
