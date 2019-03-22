@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
         - name: position-simulator
-          image: richardchesterwood/k8s-fleetman-position-simulator:release1
+          image: richardchesterwood/k8s-fleetman-position-simulator:release2
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: production-microservice
           resources:
-            limits:
-              memory: 384Mi
-              cpu: 250m          
+          #   limits:
+          #     memory: 384Mi
+          #     cpu: 250m          

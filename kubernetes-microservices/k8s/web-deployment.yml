@@ -3,8 +3,7 @@ kind: Deployment
 metadata:
   name: webapp
 spec:
-  minReadySeconds: 10 # For demonstration purposes
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: webapp
@@ -15,8 +14,11 @@ spec:
     spec:
       containers:
         - name: webapp
-          image: richardchesterwood/k8s-fleetman-webapp-angular:release0
+          image: richardchesterwood/k8s-fleetman-webapp-angular:release2
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice
           resources:
-            limits:
-              memory: 384Mi
-              cpu: 250m
+            # limits:
+            #   memory: 384Mi
+            #   cpu: 250m

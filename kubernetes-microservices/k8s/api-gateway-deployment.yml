@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: richardchesterwood/k8s-fleetman-api-gateway:release1
+          image: richardchesterwood/k8s-fleetman-api-gateway:release2
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: production-microservice
           resources:
-            limits:
-              memory: 384Mi
-              cpu: 250m          
+          #   limits:
+          #     memory: 384Mi
+          #     cpu: 250m          

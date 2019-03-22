@@ -134,3 +134,11 @@ Date: Wed, 20 Mar 2019 23:29:39 GMT
 <p>Fleetman API Gateway at Wed Mar 20 23:29:39 GMT 2019</p>
 ```
 
+**Finally the Web App**:
+
+```bash
+$ kubectl apply -f web-deployment.yml
+
+$ kubectl apply -f web-service.yml
+```
+

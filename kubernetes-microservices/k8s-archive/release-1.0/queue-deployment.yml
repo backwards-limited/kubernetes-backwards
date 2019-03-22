@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: queue
-          image: richardchesterwood/k8s-fleetman-queue:release2
+          image: richardchesterwood/k8s-fleetman-queue:release1
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: production-microservice          
