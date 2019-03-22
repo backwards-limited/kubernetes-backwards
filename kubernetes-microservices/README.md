@@ -3,6 +3,8 @@
 ## Table of Contents
 
 - [Introduction](docs/introduction.md)
+
+- [Minikube](docs/minikube.md)
   
 - [Pods](docs/pods.md)
 

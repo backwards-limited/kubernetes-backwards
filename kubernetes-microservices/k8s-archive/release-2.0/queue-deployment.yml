@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: queue
+  template: # Template for the pods
+    metadata:
+      labels:
+        app: queue
+    spec:
+      containers:
+        - name: queue
+          image: richardchesterwood/k8s-fleetman-queue:release2
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice          
+          resources:
+            # limits:
+            #   memory: 384Mi
+            #   cpu: 250m          

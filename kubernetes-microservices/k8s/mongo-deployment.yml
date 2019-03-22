@@ -1,23 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: position-tracker
+  name: mongo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: position-tracker
+      app: mongo
   template: # Template for the pods
     metadata:
       labels:
-        app: position-tracker
+        app: mongo
     spec:
       containers:
-        - name: position-tracker
-          image: richardchesterwood/k8s-fleetman-position-tracker:release3
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: production-microservice
+        - name: mongo
+          image: mongo:3.6.5-jessie
           resources:
           #   limits:
           #     memory: 384Mi

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: position-tracker
-          image: richardchesterwood/k8s-fleetman-position-tracker:release3
+          image: richardchesterwood/k8s-fleetman-position-tracker:release2
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: production-microservice
