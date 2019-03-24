@@ -26,6 +26,6 @@ spec:
           #     cpu: 250m
       volumes:
         - name: mongo-persistent-storage
-          # Pointer to the configuration of HOW we want the mount to be implemented
-          persistentVolumeClaim:
-            claimName: mongo-pvc
+          hostPath:
+            path: /mnt/mongo/data
+            type: DirectoryOrCreate

@@ -19,3 +19,5 @@
 - [Microservices](docs/microservices.md)
 
 - [Persistence](docs/persistence.md)
+
+- [AWS](docs/aws/aws.md)

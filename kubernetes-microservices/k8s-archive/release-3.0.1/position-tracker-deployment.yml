@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: position-tracker
+  template: # Template for the pods
+    metadata:
+      labels:
+        app: position-tracker
+    spec:
+      containers:
+        - name: position-tracker
+          image: richardchesterwood/k8s-fleetman-position-tracker:release3
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production-microservice
+          resources:
+          #   limits:
+          #     memory: 384Mi
+          #     cpu: 250m          
