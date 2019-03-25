@@ -105,3 +105,4 @@ kubernetes-course/ProcedureDocument.md
 multi-k8s-service-account.json
 
 *.pem
+*.credentials
