@@ -156,3 +156,134 @@ Default output format [None]:
 [ec2-user@ip-172-31-10-20 ~]$ export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
 ```
 
+## Configure Cluster
+
+Create a **S3** bucket (a distributed file system):
+
+```bash
+$ aws s3api create-bucket --bucket kops-has-storage --region eu-west-2 --create-bucket-configuration LocationConstraint=eu-west-2
+{
+    "Location": "http://kops-has-storage.s3.amazonaws.com/"
+}
+```
+
+Or do the above via the UI:
+
+![Create S3 bucket](../images/create-s3.png)
+
+To set up a cluster, first set some environment variables:
+
+```bash
+$ export NAME=fleetman.k8s.local
+
+$ export KOPS_STATE_STORE=s3://kops-has-storage
+```
+
+Noting that for a **gossip based** cluster, make sure the name ends with **k8s.local**.
+
+Now we want to distribute (configure) our application node across available data centres (within a region):
+
+```bash
+$ aws ec2 describe-availability-zones --region eu-west-2
+{
+    "AvailabilityZones": [
+        {
+            "State": "available",
+            "Messages": [],
+            "RegionName": "eu-west-2",
+            "ZoneName": "eu-west-2a",
+            "ZoneId": "euw2-az2"
+        },
+        {
+            "State": "available",
+            "Messages": [],
+            "RegionName": "eu-west-2",
+            "ZoneName": "eu-west-2b",
+            "ZoneId": "euw2-az3"
+        },
+        {
+            "State": "available",
+            "Messages": [],
+            "RegionName": "eu-west-2",
+            "ZoneName": "eu-west-2c",
+            "ZoneId": "euw2-az1"
+        }
+    ]
+}
+```
+
+The next command creates configuration files for the cluster (it does not actually create a cluster as implied):
+
+```bash
+$ kops create cluster --zones eu-west-2a,eu-west-2b,eu-west-2c ${NAME}
+
+I0326 22:25:14.700961   22393 create_cluster.go:496] Inferred --cloud=aws from zone "eu-west-2a"
+...
+I0326 22:25:15.645382   22393 create_cluster.go:1407] Using SSH public key: /Users/davidainslie/.ssh/id_rsa.pub
+...
+I0326 22:25:16.550843   22393 apply_cluster.go:542] Gossip DNS: skipping DNS validation
+...
+Will create resources:
+  AutoscalingGroup/master-eu-west-2a.masters.fleetman.k8s.local
+...
+Cluster configuration has been created.
+
+Suggestions:
+ * list clusters with: kops get cluster
+ * edit this cluster with: kops edit cluster fleetman.k8s.local
+ * edit your node instance group: kops edit ig --name=fleetman.k8s.local nodes
+ * edit your master instance group: kops edit ig --name=fleetman.k8s.local master-eu-west-2a
+
+Finally configure your cluster with: kops update cluster fleetman.k8s.local --yes
+```
+
+We can edit the configuration, but what is more important is to change/edit the following:
+
+```bash
+$ kops edit ig nodes --name ${NAME}
+```
+
+and change **machineType** to **t2.micro**; **maxSize** to **5**; **minSize** to **3**.
+
+```yaml
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  creationTimestamp: 2019-03-26T22:25:15Z
+  labels:
+    kops.k8s.io/cluster: fleetman.k8s.local
+  name: nodes
+spec:
+  image: kope.io/k8s-1.11-debian-stretch-amd64-hvm-ebs-2018-08-17
+  machineType: t2.medium
+  maxSize: 2
+  minSize: 2
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes
+  role: Node
+  subnets:
+  - eu-west-2a
+  - eu-west-2b
+  - eu-west-2c
+```
+
+and edit the **master** configuration:
+
+```bash
+$ kops edit ig --name=fleetman.k8s.local master-eu-west-2a
+```
+
+again changing **machineType** to **t2.micro**.
+
+Check the changes:
+
+```bash
+$ kops get ig --name ${NAME}
+
+NAME			         	ROLE		MACHINETYPE		MIN		MAX		ZONES
+master-eu-west-2a		Master	t2.micro			1			1			eu-west-2a
+nodes								Node		t2.micro			3			5			eu-west-2a,eu-west-2b,eu-west-2c
+```
+
+
+
