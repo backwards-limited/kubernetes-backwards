@@ -141,11 +141,18 @@ Default output format [None]:
 {
     "Users": [
         {
-            "UserName": "kops",
             "Path": "/",
-            "CreateDate": "2019-03-25T22:17:24Z",
-            "UserId": "AIDAJW7RH5XKHE6VMCY2E",
-            "Arn": "arn:aws:iam::890953945913:user/kops"
+            "UserName": "david",
+            "UserId": "AIDAJWYA4T56M6BWTROFG",
+            "Arn": "arn:aws:iam::890953945913:user/david",
+            "CreateDate": "2019-03-26T21:34:00Z"
+        },
+        {
+            "Path": "/",
+            "UserName": "kops",
+            "UserId": "AIDAIZ5G6B5QLAIAZIDNW",
+            "Arn": "arn:aws:iam::890953945913:user/kops",
+            "CreateDate": "2019-03-26T21:37:24Z"
         }
     ]
 }
@@ -214,6 +221,12 @@ $ aws ec2 describe-availability-zones --region eu-west-2
 
 The next command creates configuration files for the cluster (it does not actually create a cluster as implied):
 
+(Noting that if the following cluster has already been configured you can do):
+
+```bash
+$ kops delete cluster --name fleetman.k8s.local
+```
+
 ```bash
 $ kops create cluster --zones eu-west-2a,eu-west-2b,eu-west-2c ${NAME}
 
@@ -270,7 +283,7 @@ spec:
 and edit the **master** configuration:
 
 ```bash
-$ kops edit ig --name=fleetman.k8s.local master-eu-west-2a
+$ kops edit ig --name ${NAME} master-eu-west-2a
 ```
 
 again changing **machineType** to **t2.micro**.
@@ -285,5 +298,77 @@ master-eu-west-2a		Master	t2.micro			1			1			eu-west-2a
 nodes								Node		t2.micro			3			5			eu-west-2a,eu-west-2b,eu-west-2c
 ```
 
+## Create Cluster
 
+With all the legwork done to configure our cluster, we just need to issue:
 
+```bash
+$ kops update cluster ${NAME} --yes
+...
+Cluster is starting.  It should be ready in a few minutes.
+
+Suggestions:
+ * validate cluster: kops validate cluster
+ * list nodes: kubectl get nodes --show-labels
+ * ssh to the master: ssh -i ~/.ssh/id_rsa admin@api.fleetman.k8s.local
+ * the admin user is specific to Debian. If not using Debian please use the appropriate user based on your OS.
+ * read about installing addons at: https://github.com/kubernetes/kops/blob/master/docs/addons.md.
+```
+
+```bash
+$ kops validate cluster
+Using cluster from kubectl context: fleetman.k8s.local
+
+Validating cluster fleetman.k8s.local
+
+INSTANCE GROUPS
+NAME			        ROLE	  MACHINETYPE	 MIN	MAX	 SUBNETS
+master-eu-west-2a	Master	t2.micro	   1	  1	   eu-west-2a
+nodes			        Node	  t2.micro	   3	  5	   eu-west-2a,eu-west-2b,eu-west-2c
+
+NODE STATUS
+NAME						                             ROLE	   READY
+ip-172-20-112-94.eu-west-2.compute.internal	 node	   True
+ip-172-20-38-252.eu-west-2.compute.internal	 node	   True
+ip-172-20-48-86.eu-west-2.compute.internal	 master	 True
+ip-172-20-65-73.eu-west-2.compute.internal	 node	   True
+
+Your cluster fleetman.k8s.local is ready
+```
+
+![Nodes by kops](../images/kops-nodes.png)
+
+---
+
+![Load balancer](../images/load-balancer.png)
+
+---
+
+![Auto scaling](../images/auto-scaling.png)
+
+## Deploy
+
+To **apply** our k8s manifests onto the AWS cluster (instead of locally on Minikube), hopefully the command line shows that we are in the required context:
+
+```bash
+kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+```
+
+Note, we'll have to update the **storage** manifest to use AWS.
+
+Here we see our initial volumes, where:
+
+- top 3 are for the *worker* nodes
+- next is for the master
+- followed by 2 key/value databases
+- finally our original *bootstrap* for giving us a starting point
+
+![AWS volumes](../images/aws-volumes.png)
+
+We want to add to this list for **Mongo**.
+
+## Delete Cluster
+
+```bash
+$ kops delete cluster --name ${NAME} --yes
+```

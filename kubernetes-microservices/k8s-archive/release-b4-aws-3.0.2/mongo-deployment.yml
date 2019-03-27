@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template: # Template for the pods
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:3.6.5-jessie
+          # Think of the following as only related to the container
+          volumeMounts:
+            - name: mongo-persistent-storage # Name of the Volume
+              mountPath: /data/db # Path to mount i.e. directory within the container to be mapped externally (which folder, by default, does Mongo store its data)
+          # With the above, where do we actually store the data (external to the container (and pod))? - We accomplish this with a "volume" (see below)
+          resources:
+          #   limits:
+          #     memory: 384Mi
+          #     cpu: 250m
+      volumes:
+        - name: mongo-persistent-storage
+          # Pointer to the configuration of HOW we want the mount to be implemented
+          persistentVolumeClaim:
+            claimName: mongo-pvc
