@@ -485,7 +485,89 @@ svc/kubernetes                ClusterIP     100.64.0.1      <none>         443/T
 
 ## Real Domain Name
 
+![Create hosted zone](../images/create-hosted-zone.png)
 
+---
+
+![Create new hosted zone](../images/create-new-hosted-zone.png)
+
+---
+
+![Create record set](../images/create-record-set.png)
+
+We can now create a **subdomain** for our **domain**.
+
+![Create new subdomain](../images/create-new-subdomain.png)
+
+## Fault Tolerance
+
+First, on which of our three nodes are the pods running?
+
+```bash
+$ kubectl get pods -o wide
+
+NAME                                  READY     STATUS    RESTARTS   AGE       IP           NODE
+api-gateway-567cccb5f9-nvlgj          1/1       Running   0          1h        100.96.2.2   ip-172-20-111-239.eu-west-2.compute.internal
+mongo-7b974f887c-2g2jw                1/1       Running   0          1h        100.96.1.4   ip-172-20-75-233.eu-west-2.compute.internal
+position-simulator-8577f77866-rxzhb   1/1       Running   0          1h        100.96.3.3   ip-172-20-59-52.eu-west-2.compute.internal
+position-tracker-59d5c69c97-2lkjd     1/1       Running   0          1h        100.96.2.3   ip-172-20-111-239.eu-west-2.compute.internal
+queue-865db57799-jhbqr                1/1       Running   0          1h        100.96.3.4   ip-172-20-59-52.eu-west-2.compute.internal
+webapp-64ddf56664-8bz4w               1/1       Running   0          1h        100.96.1.5   ip-172-20-75-233.eu-west-2.compute.internal
+```
+
+Let's force a shutdown of the node with our webapp and of course Kubernetes should restart it.
+
+![Shutdown node](../images/shutdown-node.png)
+
+and would you believe it:
+
+```bash
+$ kubectl get all
+...
+NAME                                     READY     STATUS              RESTARTS   AGE
+...
+po/webapp-64ddf56664-rhg6z               0/1       ContainerCreating   0          4s
+...
+```
+
+and instead of running on "233", it is now on "239":
+
+```bash
+$ kubectl get pods -o wide
+NAME                       READY STATUS    NODE
+...
+webapp-64ddf56664-rhg6z    1/1   Running   ip-172-20-111-239.eu-west-2.compute.internal
+```
+
+Note that we shutdown a **node** and it was AWS **auto scaling group** that eventually started a new node in said availability zone - Kubernetes only starts new pods according to a configured replica set.
+
+![Autoscaling](../images/auto-scaling-works.png)
+
+```bash
+$ kubectl get nodes
+NAME                                           STATUS    ROLES     AGE       VERSION
+ip-172-20-111-239.eu-west-2.compute.internal   Ready     node      2h        v1.11.8
+ip-172-20-55-12.eu-west-2.compute.internal     Ready     master    2h        v1.11.8
+ip-172-20-59-52.eu-west-2.compute.internal     Ready     node      2h        v1.11.8
+ip-172-20-66-28.eu-west-2.compute.internal     Ready     node      8m        v1.11.8
+```
+
+Note the **age** of the new node compared with the originals.
+
+Let's bump up our webapp replicas to 2 and apply:
+
+```bash
+$ kubectl apply -f .
+...
+deployment "webapp" configured
+service "fleetman-webapp" unchanged
+
+$ kubectl get pods
+NAME                                  READY     STATUS              RESTARTS   AGE
+...
+webapp-64ddf56664-rhg6z               1/1       Running             0          20m
+webapp-64ddf56664-wfpqn               0/1       ContainerCreating   0          7s
+```
 
 ## Delete Cluster
 
