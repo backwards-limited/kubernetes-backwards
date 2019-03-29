@@ -129,7 +129,7 @@ Now **add user**:
 
 ```bash
 [ec2-user@ip-172-31-10-20 ~]$ aws configure
-AWS Access Key ID [None]: AKIAIE6KXD4WFKA33UTQ
+AWS Access Key ID [None]: <your key>
 AWS Secret Access Key [None]: <your secret>
 Default region name [None]: eu-west-2
 Default output format [None]:
@@ -224,7 +224,7 @@ The next command creates configuration files for the cluster (it does not actual
 (Noting that if the following cluster has already been configured you can do):
 
 ```bash
-$ kops delete cluster --name fleetman.k8s.local
+$ kops delete cluster --name ${NAME}
 ```
 
 ```bash
@@ -283,7 +283,7 @@ spec:
 and edit the **master** configuration:
 
 ```bash
-$ kops edit ig --name ${NAME} master-eu-west-2a
+$ kops edit ig master-eu-west-2a --name ${NAME}
 ```
 
 again changing **machineType** to **t2.micro**.
@@ -365,7 +365,127 @@ Here we see our initial volumes, where:
 
 ![AWS volumes](../images/aws-volumes.png)
 
-We want to add to this list for **Mongo**.
+We want to add to this list for **Mongo**. So just to check things are working, let's only **apply** the storage manifest:
+
+```bash
+$ kubectl apply -f storage.yml
+persistentvolumeclaim "mongo-pvc" created
+storageclass "cloud-ssd" created
+```
+
+```bash
+$ kubectl get pvc
+NAME      STATUS VOLUME                                  CAPACITY ACCESS MODES   STORAGECLASS 
+mongo-pvc Bound  pvc-7a7144b6-5268-11e9-b54c-06725bb9d18e 7Gi      RWO           cloud-ssd
+```
+
+Now even though we did not declare a **volume** in the manifest, we can see that one is dynamically generated for us:
+
+```bash
+$ kubectl get pv
+NAME                                 CAPACITY ACCESS RECLAIM STATUS    CLAIM     STORAGECLASS
+pvc-7a7144b6-5268-11e9-b54c-06725bb9d18e  7Gi  RWO  Delete Bound  default/mongo-pvc cloud-ssd 
+```
+
+![AWS volume](../images/aws-volume.png)
+
+and apply our mongo stack:
+
+```bash
+$ kubectl apply -f mongo-deployment.yml
+deployment "mongo" created
+
+$ kubectl apply -f mongo-service.yml
+service "fleetman-mongodb" created
+```
+
+```bash
+$ kubectl get all
+NAME           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy/mongo   1         1         1            1           1m
+
+NAME                  DESIRED   CURRENT   READY     AGE
+rs/mongo-7b974f887c   1         1         1         1m
+
+NAME                        READY     STATUS    RESTARTS   AGE
+po/mongo-7b974f887c-2g2jw   1/1       Running   0          1m
+
+NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
+svc/fleetman-mongodb   ClusterIP   100.69.97.66   <none>        27017/TCP   46s
+svc/kubernetes         ClusterIP   100.64.0.1     <none>        443/TCP     28m
+```
+
+and our volume will now be **in-use**:
+
+![AWS volume in use](../images/aws-volume-in-use.png)
+
+Before we deploy the remaining manifest, first replace **NodePort** with **LoadBalancer** and **ClusterIP** in our services. A node port is really only for local development and testing. And **apply** everything else:
+
+```bash
+$ kubectl apply -f .
+deployment "api-gateway" created
+service "fleetman-api-gateway" created
+deployment "mongo" configured
+service "fleetman-mongodb" unchanged
+deployment "position-simulator" created
+deployment "position-tracker" created
+service "fleetman-position-tracker" created
+deployment "queue" created
+service "fleetman-queue" created
+persistentvolumeclaim "mongo-pvc" unchanged
+storageclass "cloud-ssd" configured
+deployment "webapp" created
+service "fleetman-webapp" created
+```
+
+```bash
+$ kubectl get all
+NAME                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deploy/api-gateway          1         1         1            1           1m
+deploy/mongo                1         1         1            1           17m
+deploy/position-simulator   1         1         1            1           1m
+deploy/position-tracker     1         1         1            1           1m
+deploy/queue                1         1         1            1           1m
+deploy/webapp               1         1         1            1           1m
+
+NAME                               DESIRED   CURRENT   READY     AGE
+rs/api-gateway-567cccb5f9          1         1         1         1m
+rs/mongo-7b974f887c                1         1         1         17m
+rs/position-simulator-8577f77866   1         1         1         1m
+rs/position-tracker-59d5c69c97     1         1         1         1m
+rs/queue-865db57799                1         1         1         1m
+rs/webapp-64ddf56664               1         1         1         1m
+
+NAME                                     READY     STATUS    RESTARTS   AGE
+po/api-gateway-567cccb5f9-nvlgj          1/1       Running   0          1m
+po/mongo-7b974f887c-2g2jw                1/1       Running   0          17m
+po/position-simulator-8577f77866-rxzhb   1/1       Running   0          1m
+po/position-tracker-59d5c69c97-2lkjd     1/1       Running   0          1m
+po/queue-865db57799-jhbqr                1/1       Running   0          1m
+po/webapp-64ddf56664-8bz4w               1/1       Running   0          1m
+
+NAME                          TYPE          CLUSTER-IP      EXTERNAL-IP    PORT(S)
+svc/fleetman-api-gateway      ClusterIP     100.64.28.123   <none>         8080/TCP
+svc/fleetman-mongodb          ClusterIP     100.69.97.66    <none>         27017/TCP
+svc/fleetman-position-tracker ClusterIP     100.70.183.1    <none>         8080/TCP
+svc/fleetman-queue            ClusterIP     100.65.142.105  <none>         8161/TCP,61616/TCP
+svc/fleetman-webapp           LoadBalancer  100.64.139.67   ad46d7b84526d..80:31786/TCP 
+svc/kubernetes                ClusterIP     100.64.0.1      <none>         443/TCP
+```
+
+![AWS load balancers](../images/aws-load-balancers.png)
+
+---
+
+![Auto DNS](../images/auto-dns.png)
+
+---
+
+![Deployed and running on AWS](../images/deployed-and-running-on-aws.png)
+
+## Real Domain Name
+
+
 
 ## Delete Cluster
 
