@@ -21,3 +21,5 @@
 - [Persistence](docs/persistence.md)
 
 - [AWS](docs/aws/aws.md)
+
+- [Logging](docs/logging.md)
