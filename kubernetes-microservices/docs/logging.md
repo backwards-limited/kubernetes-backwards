@@ -77,18 +77,20 @@ Labels:                   addonmanager.kubernetes.io/mode=Reconcile
 Annotations:              kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"addonmanager.kubernetes.io/mode":"Reconcile","k8s-app":"kibana-logging","ku...
 Selector:                 k8s-app=kibana-logging
 Type:                     LoadBalancer
-IP:                       100.65.208.243
-LoadBalancer Ingress:     a34d4439c558d11e9b1e4066dc42996f-529466565.eu-west-2.elb.amazonaws.com
+IP:                       100.70.20.111
+LoadBalancer Ingress:     a9d71ae79561311e9b6ea06ccc1beb8a-341025983.eu-west-2.elb.amazonaws.com
 Port:                     <unset>  5601/TCP
 TargetPort:               ui/TCP
-NodePort:                 <unset>  30410/TCP
-Endpoints:
+NodePort:                 <unset>  32073/TCP
+Endpoints:                100.96.1.4:5601
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:
   Type    Reason                Age   From                Message
   ----    ------                ----  ----                -------
-  Normal  EnsuringLoadBalancer  10m   service-controller  Ensuring load balancer
-  Normal  EnsuredLoadBalancer   10m   service-controller  Ensured load balancer
+  Normal  EnsuringLoadBalancer  1m    service-controller  Ensuring load balancer
+  Normal  EnsuredLoadBalancer   1m    service-controller  Ensured load balancer
+  Normal  UpdatedLoadBalancer   1m    service-controller  Updated load balancer with new hosts
 ```
 
+Then we can analyse our logs through the [kibana web UI](kibana.md).

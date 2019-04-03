@@ -23,3 +23,9 @@
 - [AWS](docs/aws/aws.md)
 
 - [Logging](docs/logging.md)
+
+- [Kibana](docs/kibana.md)
+
+- [Monitoring](docs/monitoring.md)
+
+- [Helm](docs/helm.md)
