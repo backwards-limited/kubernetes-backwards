@@ -2,23 +2,25 @@
 
 ## Table of Contents
 
-- [Introduction](docs/introduction.md)
-
-- [Minikube](docs/minikube.md)
+- Kubernetes
   
-- [Pods](docs/pods.md)
+  - [Introduction](docs/introduction.md)
 
-- [Services](docs/services.md)
+  - [Minikube](docs/minikube.md)
 
-- [ReplicaSets](docs/replicasets.md)
+  - [Pods](docs/pods.md)
 
-- [Deployments](docs/deployments.md)
+  - [Services](docs/services.md)
 
-- [Networking & Service Discovery](docs/networking.md)
+  - [ReplicaSets](docs/replicasets.md)
 
-- [Microservices](docs/microservices.md)
+  - [Deployments](docs/deployments.md)
 
-- [Persistence](docs/persistence.md)
+  - [Networking & Service Discovery](docs/networking.md)
+
+  - [Microservices](docs/microservices.md)
+
+  - [Persistence](docs/persistence.md)
 
 - [AWS](docs/aws/aws.md)
 
@@ -28,4 +30,10 @@
 
 - [Monitoring](docs/monitoring.md)
 
-- [Helm](docs/helm.md)
+  - [Helm](docs/helm.md)
+
+  - [Prometheus](docs/prometheus.md)
+
+  - [Grafana](docs/grafana.md)
+
+- [Alerting](docs/alerting.md)
