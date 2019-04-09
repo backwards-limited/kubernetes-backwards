@@ -24,6 +24,8 @@
 
 - [AWS](docs/aws/aws.md)
 
+  - [Kops](docs/aws/kops.md)
+
 - [Logging](docs/logging.md)
 
 - [Kibana](docs/kibana.md)

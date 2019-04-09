@@ -1,14 +1,14 @@
 # Helm
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!] at ☸️ fleetman.k8s.local
 ➜ helm version
 Client: &version.Version{SemVer:"v2.13.1", GitCommit:"618447cbf203d147601b4b9bd7f8c37a5d39fbb4", GitTreeState:"clean"}
 Error: could not find tiller
 ```
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!] at ☸️ fleetman.k8s.local
 ➜ helm init
 $HELM_HOME has been configured at /Users/davidainslie/.helm.
 
@@ -23,7 +23,7 @@ Happy Helming!
 And note the new **tiller** pod:
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!] at ☸️ fleetman.k8s.local
 ➜ kubectl get pods --namespace kube-system
 NAME                                                                  READY     STATUS
 ...
@@ -35,7 +35,7 @@ tiller-deploy-7c69c66d57-hzrcg                                        1/1       
 Now check the helm version again:
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!] at ☸️ fleetman.k8s.local took 2s
+kubernetes-backwards/kubernetes-microservices/k8s on master [!] at ☸️ fleetman.k8s.local took 2s
 ➜ helm version
 Client: &version.Version{SemVer:"v2.13.1", GitCommit:"618447cbf203d147601b4b9bd7f8c37a5d39fbb4", GitTreeState:"clean"}
 Server: &version.Version{SemVer:"v2.13.1", GitCommit:"618447cbf203d147601b4b9bd7f8c37a5d39fbb4", GitTreeState:"clean"}
@@ -48,7 +48,7 @@ Helm has a lot to offer:
 ## Example - MySql With Helm
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!] at ☸️ fleetman.k8s.local
 ➜ helm repo update
 Hang tight while we grab the latest from your chart repositories...
 ...Skip local chart repository
@@ -62,15 +62,15 @@ Update Complete. ⎈ Happy Helming!⎈
 We first need to give the necessary privileges to tiller giving it access to the **default** namespace:
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ kubectl create serviceaccount --namespace kube-system tiller
 serviceaccount "tiller" created
 
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 clusterrolebinding "tiller-cluster-rule" created
 
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 deployment "tiller-deploy" patched
 ```
@@ -78,7 +78,7 @@ deployment "tiller-deploy" patched
 And now for MySql:
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ helm install stable/mysql --name my-special-installation --set mysqlPassword=password
 NAME:   my-special-installation
 LAST DEPLOYED: Mon Apr  8 14:42:44 2019
@@ -143,7 +143,7 @@ To connect to your database directly from outside the K8s cluster:
 ```
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local took 2s
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local took 2s
 ➜ kubectl get pods
 NAME                                           READY     STATUS        RESTARTS   AGE
 ...
@@ -152,21 +152,21 @@ my-special-installation-mysql-b974d969-dtffg   0/1       Pending       0        
 ```
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ kubectl get services
 NAME                            TYPE           CLUSTER-IP       EXTERNAL-IP        PORT(S)              ...
 my-special-installation-mysql   ClusterIP      100.69.89.227    <none>             3306/TCP
 ```
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ helm ls
 NAME                   	REVISION	UPDATED                 	STATUS  	CHART       	APP VERSION	NAMESPACE
 my-special-installation	1       	Mon Apr  8 14:42:44 2019	DEPLOYED	mysql-0.15.0	5.7.14     	default
 ```
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ➜ helm delete --purge my-special-installation
 release "my-special-installation" deleted
 ```

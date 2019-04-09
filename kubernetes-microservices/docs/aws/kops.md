@@ -351,7 +351,7 @@ Your cluster fleetman.k8s.local is ready
 To **apply** our k8s manifests onto the AWS cluster (instead of locally on Minikube), hopefully the command line shows that we are in the required context:
 
 ```bash
-kubernetes-backwards/kubernetes-microservices/k8s on  master [!?] at ☸️ fleetman.k8s.local
+kubernetes-backwards/kubernetes-microservices/k8s on master [!?] at ☸️ fleetman.k8s.local
 ```
 
 Note, we'll have to update the **storage** manifest to use AWS.
