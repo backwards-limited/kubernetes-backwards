@@ -39,3 +39,5 @@
   - [Grafana](docs/grafana.md)
 
 - [Alerting](docs/alerting.md)
+
+  - [Slack](docs/slack.md)
