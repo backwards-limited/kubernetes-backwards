@@ -161,15 +161,15 @@ Using cluster from kubectl context: backwards.tech
 Validating cluster backwards.tech
 
 INSTANCE GROUPS
-NAME								ROLE			MACHINETYPE		MIN		MAX		SUBNETS
-master-eu-west-2a		Master		t2.micro			1			1			eu-west-2a
-nodes								Node			t2.micro			2			2			eu-west-2a
+NAME                ROLE      MACHINETYPE   MIN   MAX   SUBNETS
+master-eu-west-2a   Master    t2.micro      1     1     eu-west-2a
+nodes               Node      t2.micro      2     2     eu-west-2a
 
 NODE STATUS
-NAME																					ROLE		READY
-ip-172-20-35-51.eu-west-2.compute.internal		node		True
-ip-172-20-43-136.eu-west-2.compute.internal		master	True
-ip-172-20-44-40.eu-west-2.compute.internal		node		True
+NAME                                          ROLE    READY
+ip-172-20-35-51.eu-west-2.compute.internal    node    True
+ip-172-20-43-136.eu-west-2.compute.internal   master  True
+ip-172-20-44-40.eu-west-2.compute.internal    node    True
 
 Your cluster backwards.tech is ready
 ```
