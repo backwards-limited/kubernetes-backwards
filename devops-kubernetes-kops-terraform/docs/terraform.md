@@ -11,7 +11,7 @@ AWS_SECRET_KEY="your secret key"
 
 and another terraform file [terraform.code.tf](../terraform.code.tf):
 
-```json
+```yaml
     # ************************
     # vars.tf
     # ************************
