@@ -106,3 +106,8 @@ multi-k8s-service-account.json
 
 *.pem
 *.credentials
+
+.terraform
+terraform.tfvars
+terraform.tfstate.backup
+private_ips.txt

@@ -8,6 +8,8 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
 
 - [Kubernetes Microservices](https://www.udemy.com/kubernetes-microservices)
 
+- [Devops Kubernetes with Kops and Terraform](https://www.udemy.com/learn-devops-kubernetes-deployment-by-kops-and-terraform)
+
 ## Table of Contents
 
 - [Setup](docs/setup.md)
@@ -31,3 +33,5 @@ Kubernetes functionality showing example usage while covering Kubernetes courses
   - [Docker and Kubernetes The Complete Course](docker-kubernetes-complete-course/README.md)
 
   - [Kubernetes Microservices](kubernetes-microservices/README.md)
+
+  - [Devops Kubernetes with Kops and Terraform](devops-kubernetes-kops-terraform/README.md)
