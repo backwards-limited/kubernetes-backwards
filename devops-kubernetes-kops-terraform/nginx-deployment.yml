@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2 # Tells deployment to run 2 pods matching the template
+  template: # Create pods using pod definition in this template
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.7.9
+          volumeMounts:
+            # What we're going to mount (SOURCE)
+            - name: nginx-content-folder
+            # Where we're going to mount it within pod (container) in Kubernetes (DESTINATION)
+              mountPath: /usr/share/nginx/html
+          ports:
+            - containerPort: 80
+          resources:
+            # limits:
+            #   memory: 384Mi
+            #   cpu: 250m  
+      # Volumes specifications
+      volumes:
+        - name: nginx-content-folder
+          configMap:
+            name: nginx-content

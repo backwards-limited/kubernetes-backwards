@@ -51,26 +51,26 @@ and another terraform file [terraform.code.tf](../terraform.code.tf):
     # ************************
     # instance.tf
     # ************************
-    resource "aws_instance" "BACKWARDS" {
+    resource "aws_instance" "backwards" {
       ami = "${lookup(var.AMIS, var.AWS_REGION)}"
-      tags { Name = "BACKWARDS" }
+      tags { Name = "backwards" }
       instance_type = "t2.micro"
       provisioner "local-exec" {
-         command = "echo ${aws_instance.BACKWARDS.private_ip} >> private_ips.txt"
+         command = "echo ${aws_instance.backwards.private_ip} >> private_ips.txt"
       }
     }
     output "ip" {
-        value = "${aws_instance.BACKWARDS.public_ip}"
+        value = "${aws_instance.backwards.public_ip}"
     }
 ```
 
 ## Use Terraform
 
 ```bash
-kubernetes-backwards/devops-kubernetes-kops-terraform on  master [!+?]
+kubernetes-backwards/devops-kubernetes-kops-terraform on master [!+?]
 ➜ export AWS_DEFAULT_PROFILE=devops
 
-kubernetes-backwards/devops-kubernetes-kops-terraform on  master [!+?] using ☁️ devops
+kubernetes-backwards/devops-kubernetes-kops-terraform on master [!+?] using ☁️ devops
 ➜ terraform init
 
 Initializing provider plugins...
@@ -101,7 +101,7 @@ commands will detect it and remind you to do so if necessary.
 Now **apply** to execute our terraform files:
 
 ```bash
-kubernetes-backwards/devops-kubernetes-kops-terraform on  master [!+?] using ☁️ devops
+kubernetes-backwards/devops-kubernetes-kops-terraform on master [!+?] using ☁️ devops
 ➜ terraform apply
 
 An execution plan has been generated and is shown below.
@@ -110,7 +110,7 @@ Resource actions are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-  + aws_instance.BACKWARDS
+  + aws_instance.backwards
       id:                           <computed>
       ami:                          "ami-7ad7c21e"
       arn:                          <computed>
@@ -155,7 +155,7 @@ Do you want to perform these actions?
 
   Enter a value: yes
 
-aws_instance.BACKWARDS: Creating...
+aws_instance.backwards: Creating...
   ami:                          "" => "ami-7ad7c21e"
   arn:                          "" => "<computed>"
   associate_public_ip_address:  "" => "<computed>"
@@ -189,12 +189,12 @@ aws_instance.BACKWARDS: Creating...
   tenancy:                      "" => "<computed>"
   volume_tags.%:                "" => "<computed>"
   vpc_security_group_ids.#:     "" => "<computed>"
-aws_instance.BACKWARDS: Still creating... (10s elapsed)
-aws_instance.BACKWARDS: Still creating... (20s elapsed)
-aws_instance.BACKWARDS: Still creating... (30s elapsed)
-aws_instance.BACKWARDS: Provisioning with 'local-exec'...
-aws_instance.BACKWARDS (local-exec): Executing: ["/bin/sh" "-c" "echo 172.31.2.225 >> private_ips.txt"]
-aws_instance.BACKWARDS: Creation complete after 32s (ID: i-07183d4004de6edea)
+aws_instance.backwards: Still creating... (10s elapsed)
+aws_instance.backwards: Still creating... (20s elapsed)
+aws_instance.backwards: Still creating... (30s elapsed)
+aws_instance.backwards: Provisioning with 'local-exec'...
+aws_instance.backwards (local-exec): Executing: ["/bin/sh" "-c" "echo 172.31.2.225 >> private_ips.txt"]
+aws_instance.backwards: Creation complete after 32s (ID: i-07183d4004de6edea)
 
 Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
@@ -210,9 +210,9 @@ The output will be a randomly generated IP we can SSH onto. Double check your AW
 When you're done, **DON'T FORGET TO SHUT DOWN YOUR INSTANCES** e.g.
 
 ```bash
-kubernetes-backwards/devops-kubernetes-kops-terraform on  master [!+?] using ☁️ devops
+kubernetes-backwards/devops-kubernetes-kops-terraform on master [!+?] using ☁️ devops
 ➜ terraform destroy
-aws_instance.BACKWARDS: Refreshing state... (ID: i-07183d4004de6edea)
+aws_instance.backwards: Refreshing state... (ID: i-07183d4004de6edea)
 
 An execution plan has been generated and is shown below.
 Resource actions are indicated with the following symbols:
@@ -220,8 +220,7 @@ Resource actions are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-  - aws_instance.BACKWARDS
-
+  - aws_instance.backwards
 
 Plan: 0 to add, 0 to change, 1 to destroy.
 
@@ -231,10 +230,10 @@ Do you really want to destroy all resources?
 
   Enter a value: yes
 
-aws_instance.BACKWARDS: Destroying... (ID: i-07183d4004de6edea)
-aws_instance.BACKWARDS: Still destroying... (ID: i-07183d4004de6edea, 10s elapsed)
-aws_instance.BACKWARDS: Still destroying... (ID: i-07183d4004de6edea, 20s elapsed)
-aws_instance.BACKWARDS: Destruction complete after 30s
+aws_instance.backwards: Destroying... (ID: i-07183d4004de6edea)
+aws_instance.backwards: Still destroying... (ID: i-07183d4004de6edea, 10s elapsed)
+aws_instance.backwards: Still destroying... (ID: i-07183d4004de6edea, 20s elapsed)
+aws_instance.backwards: Destruction complete after 30s
 
 Destroy complete! Resources: 1 destroyed.
 ```

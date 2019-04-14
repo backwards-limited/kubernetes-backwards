@@ -59,7 +59,7 @@ $ ssh-keygen -f ~/.ssh/devops
 Run [kops-cluster.sh](../kops-cluster.sh) which has the **kops create cluster** command with all relevant flags. Upon execution a directory **backwards-terraform** is generated allowing terraform to be *applied* to communicate our intentions with AWS:
 
 ```bash
-kubernetes-backwards/devops-kubernetes-kops-terraform on  master [!+?] using ☁️ devops
+kubernetes-backwards/devops-kubernetes-kops-terraform on master [!+?] using ☁️ devops
 ➜ ./kops-cluster.sh
 I0413 19:50:03.942792   77699 create_cluster.go:1407] Using SSH public key: /Users/davidainslie/.ssh/devops.pub
 I0413 19:50:04.783006   77699 create_cluster.go:496] Inferred --cloud=aws from zone "eu-west-2a"
