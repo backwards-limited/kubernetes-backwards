@@ -97,8 +97,8 @@ spec:
     - ReadWriteOnce
   capacity:
     storage: 20Gi    
-	hostPath:
-  	path: /mnt/mongo/data
+  hostPath:
+    path: /mnt/mongo/data
     type: DirectoryOrCreate
 ```
 
