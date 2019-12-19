@@ -62,8 +62,8 @@ What if we can do something along the lines of:
 
 ```yaml
 volumes:
-	- name: mongo-persistent-storage
-		# Pointer to the configuration of HOW we want the mount to be implemented
+  - name: mongo-persistent-storage
+    # Pointer to the configuration of HOW we want the mount to be implemented
 ```
 
 This concept is a **Persistent Volume Claim**.
