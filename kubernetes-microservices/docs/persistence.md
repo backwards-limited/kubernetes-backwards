@@ -77,13 +77,13 @@ To apply this concept, we need a **PersistentVolumeClaim** manifest which declar
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-	name: mongo-pvc
+  name: mongo-pvc
 spec:
-	accessModes:
+  accessModes:
     - ReadWriteOnce
-	resources:
-		requests:
-			storage: 20Gi
+  resources:
+    requests:
+      storage: 20Gi
 ```
 
 ```yaml
@@ -91,7 +91,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-	name: local-storage
+  name: local-storage
 spec:
   accessModes:
     - ReadWriteOnce
