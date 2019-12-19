@@ -186,7 +186,7 @@ Now let's install a mysql client to test:
 ```
 
 ```bash
-/ # mysql -h database -uroot -ppassword fleetman
+/ # mysql -h database -u root -p password fleetman
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MySQL connection id is 2
 Server version: 5.7.25 MySQL Community Server (GPL)
