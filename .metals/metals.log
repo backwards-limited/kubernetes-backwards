@@ -1,0 +1,55 @@
+INFO  started: Metals version 0.8.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+INFO  time: initialize in 0.93s
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/BuildProperties.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+INFO  no build target: using presentation compiler with only scala-library
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+Feb 22, 2020 10:35:49 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 310
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+something's wrong: no file:///Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala in Seq[<error>]RangePosition(file:///Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala, 918, 918, 931)
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping/project/Dependencies.scala
+WARN  no build target for: /Users/davidainslie/workspace/exercises-practice/shopping copy/src/main/scala/com/shopping/Quantity.scala
+INFO  shutting down Metals
+INFO  started: Metals version 0.8.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+INFO  time: initialize in 0.31s
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping starter/src/main/scala/com/shopping/Price.scala
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping starter/src/main/scala/com/shopping/Product.scala
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping starter/src/main/scala/com/shopping/ShoppingCart.scala
+INFO  no build target: using presentation compiler with only scala-library
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping starter/src/test/scala/com/shopping/PriceSpec.scala
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping starter/src/test/scala/com/shopping/ShoppingCartSpec.scala
+INFO  shutting down Metals
+INFO  started: Metals version 0.8.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+INFO  time: initialize in 0.56s
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: /Users/davidainslie/Downloads/shopping/src/main/scala/com/shopping/ShoppingCart.scala
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping-type-class/src/main/scala/com/shopping/Shopping.scala
+INFO  shutting down Metals
+INFO  started: Metals version 0.8.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+INFO  time: initialize in 0.36s
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping-type-class/src/main/scala/com/shopping/Shopping.scala
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/Equal Experts/shopping-type-class/src/main/scala/com/shopping/ShoppingCart.scala
