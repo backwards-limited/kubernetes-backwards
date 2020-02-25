@@ -32,6 +32,9 @@
 # .idea/*.iml
 # .idea/modules
 
+# Metals
+.metals
+
 # CMake
 cmake-build-*/
 
