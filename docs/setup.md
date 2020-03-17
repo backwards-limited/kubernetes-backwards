@@ -20,6 +20,7 @@ brew install kubectl
 brew install kubernetes-helm
 brew install kops
 brew install terraform
+brew install conjure-up
 brew cask install virtualbox
 brew cask install docker
 brew cask install minikube
