@@ -83,5 +83,3 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s
 }
 ```
 
-## Deploy Kubernetes Cluster on AWS
-

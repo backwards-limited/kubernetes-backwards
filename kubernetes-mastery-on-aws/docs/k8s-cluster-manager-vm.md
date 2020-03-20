@@ -218,3 +218,68 @@ At this point, you may want to double check pricing for your region:
 Next we do not need a **sudo** password:
 
 ![Sudo](images/conjure-up-6.png)
+
+---
+
+Finally, accept component defaults and deploy:
+
+![Deploy](images/conjure-up-7.png)
+
+---
+
+![Done](images/conjure-up-done.png)
+
+```bash
+vagrant@ubuntu-xenial:~$ juju status
+Model                        Controller          Cloud/Region   Version  SLA          Timestamp
+conjure-kubernetes-core-e35  conjure-up-aws-2b0  aws/eu-west-2  2.6.10   unsupported  17:55:05Z
+
+App                Version   Status  Scale  Charm              Store       Rev  OS      Notes
+aws-integrator     1.16.266  active      1  aws-integrator     jujucharms   28  ubuntu
+containerd                   active      2  containerd         jujucharms   61  ubuntu
+easyrsa            3.0.1     active      1  easyrsa            jujucharms  296  ubuntu
+etcd               3.3.15    active      1  etcd               jujucharms  496  ubuntu
+flannel            0.11.0    active      2  flannel            jujucharms  468  ubuntu
+kubernetes-master  1.17.4    active      1  kubernetes-master  jujucharms  808  ubuntu  exposed
+kubernetes-worker  1.17.3    active      1  kubernetes-worker  jujucharms  634  ubuntu  exposed
+
+Unit                  Workload  Agent  Machine  Public address  Ports           Message
+aws-integrator/0*     active    idle   0        3.8.150.168                     Ready
+easyrsa/0*            active    idle   0/lxd/0  252.8.64.108                    Certificate Authority connected.
+etcd/0*               active    idle   0        3.8.150.168     2379/tcp        Healthy with 1 known peer
+kubernetes-master/0*  active    idle   0        3.8.150.168     6443/tcp        Kubernetes master running.
+  containerd/1        active    idle            3.8.150.168                     Container runtime available
+  flannel/1           active    idle            3.8.150.168                     Flannel subnet 10.1.49.1/24
+kubernetes-worker/0*  active    idle   1        3.8.184.47      80/tcp,443/tcp  Kubernetes worker running.
+  containerd/0*       active    idle            3.8.184.47                      Container runtime available
+  flannel/0*          active    idle            3.8.184.47                      Flannel subnet 10.1.52.1/24
+
+Machine  State    DNS           Inst id              Series  AZ          Message
+0        started  3.8.150.168   i-0f562b2c6b653447a  bionic  eu-west-2a  running
+0/lxd/0  started  252.8.64.108  juju-c1f8fc-0-lxd-0  bionic  eu-west-2a  Container started
+1        started  3.8.184.47    i-098a3c3ca3602cfa2  bionic  eu-west-2b  running
+```
+
+Once deployed, go into the AWS console and stop the EC2 instance to reduce its size and restart:
+
+![Micro](images/micro.png)
+
+## AWS IAM
+
+Securely controls access to your AWS resources:
+
+- Who can authenticate (sign in) to your account
+- What permissions do the signed in users have (authorization)
+
+When you sign into AWS with your email and password, your identity is called **AWS account root user**.
+
+Use IAM to setup different permissions for different people. IAM also provides credentials to applications running on EC2 instances to access other AWS resources.
+
+**Why is IAM important to Kubernetes?**
+
+- Kubernetes is an application that is running on AWS EC2 instances
+- Kubernetes needs to talk to AWS to provision cloud resources e.g. ELB, EBS, EFS, S3, Route 53
+
+How does IAM work for EC2 applications?
+
+![IAM working](images/iam-working.png)
