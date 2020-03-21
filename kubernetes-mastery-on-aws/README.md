@@ -4,8 +4,12 @@
 
 - [Introduction](docs/introduction.md)
 
-- Kubernetes Cluster on AWS
+- [Kubernetes Cluster on AWS](docs/k8s-cluster.md)
   
   - [Without VM](docs/k8s-cluster-manager.md)
   
   - [With VM](docs/k8s-cluster-manager-vm.md)
+
+  - [Kops](docs/kops.md)
+
+  - [Kubectl](docs/kubectl.md)
