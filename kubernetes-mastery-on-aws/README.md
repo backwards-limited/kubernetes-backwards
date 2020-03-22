@@ -13,3 +13,5 @@
   - [Kops](docs/kops.md)
 
   - [Kubectl](docs/kubectl.md)
+
+  - [Security](docs/security.md)

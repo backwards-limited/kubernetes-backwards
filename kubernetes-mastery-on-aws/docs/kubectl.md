@@ -1,5 +1,7 @@
 # Kubectl
 
+## Config
+
 Using **kubectl** to interact with a Kubernetes cluster, kubectl uses a file called **kubeconfig** to find and access a cluster.
 
 - kubeconfig is located in your home directory inside directory **.kube** e.g. **/Users/davidainslie/.kube**
@@ -72,6 +74,83 @@ NAME                                          STATUS   ROLES    AGE   VERSION
 ip-172-20-45-216.eu-west-2.compute.internal   Ready    node     47m   v1.16.7
 ip-172-20-53-18.eu-west-2.compute.internal    Ready    master   48m   v1.16.7
 ip-172-20-55-154.eu-west-2.compute.internal   Ready    node     47m   v1.16.7
+```
+
+## Namespace
+
+- Namespaces support the concept of virtual clusters
+- Namespaces divide cluster resources between users e.g. projects, teams etc.
+- Kubernetes resources only need to be unique with a namespace - avoids name collisions
+- Namespaces allow for isolation and access control
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kc get namespaces
+NAME              STATUS   AGE
+default           Active   4m14s
+kube-node-lease   Active   4m15s
+kube-public       Active   4m15s
+kube-system       Active   4m15s
+```
+
+Create a namespace named **myns**:
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kc create namespace myns
+namespace/myns created
+
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kc get namespaces
+NAME              STATUS   AGE
+default           Active   6m58s
+kube-node-lease   Active   6m59s
+kube-public       Active   6m59s
+kube-system       Active   6m59s
+myns              Active   3s
+
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kc get all --namespace=myns
+No resources found in myns namespace.
+```
+
+It would be nicer to avoid having to always include **--namespace**.
+
+First, what is the current **context** again?
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kc config current-context
+backwards.k8s.local
+```
+
+or even easier:
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kubectx --current
+backwards.k8s.local
+
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kubectx -c
+backwards.k8s.local
+```
+
+Now **set** the namespace on the current **context** where the easy way is:
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kubens myns
+Context "backwards.k8s.local" modified.
+Active namespace is "myns".
+```
+
+and the verbose (hard way) is:
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+➜ kc config set-context $(kc config current-context) --namespace=myns
+Context "backwards.k8s.local" modified.
 ```
 
 
