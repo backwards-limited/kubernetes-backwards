@@ -152,19 +152,3 @@ kubernetes-backwards at ☸️ backwards.k8s.local
 ➜ kc config set-context $(kc config current-context) --namespace=myns
 Context "backwards.k8s.local" modified.
 ```
-
-
-
-
-
-Eventually would like these services on our cluster:
-
-heapster
-
-kubernetes-dashboard
-
-metrics-server
-
-grafana (prometheus)
-
-influxdb

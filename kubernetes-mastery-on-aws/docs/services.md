@@ -106,3 +106,10 @@ Choose **Token**, paste the **authentication token**.
 
 ## Prometheus
 
+Eventually would like these services on our cluster:
+
+heapster
+
+grafana (prometheus)
+
+influxdb
