@@ -12,6 +12,8 @@
 
   - [Kops](docs/kops.md)
 
+    - [Some Services](docs/services.md)
+
   - [Kubectl](docs/kubectl.md)
 
   - [Security](docs/security.md)
