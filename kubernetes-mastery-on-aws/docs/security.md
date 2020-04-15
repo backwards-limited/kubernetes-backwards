@@ -127,38 +127,7 @@ kube-node-lease        default                              1         53m
 kube-public            default                              1         53m
 kube-system            attachdetach-controller              1         53m
 kube-system            aws-cloud-provider                   1         53m
-kube-system            certificate-controller               1         53m
-kube-system            clusterrole-aggregation-controller   1         53m
-kube-system            cronjob-controller                   1         53m
-kube-system            daemon-set-controller                1         53m
-kube-system            default                              1         53m
-kube-system            deployment-controller                1         53m
-kube-system            disruption-controller                1         53m
-kube-system            dns-controller                       1         53m
-kube-system            endpoint-controller                  1         53m
-kube-system            expand-controller                    1         53m
-kube-system            generic-garbage-collector            1         53m
-kube-system            horizontal-pod-autoscaler            1         53m
-kube-system            job-controller                       1         53m
-kube-system            kops-controller                      1         53m
-kube-system            kube-dns                             1         53m
-kube-system            kube-dns-autoscaler                  1         53m
-kube-system            kube-proxy                           1         53m
-kube-system            kubernetes-dashboard                 1         36m
-kube-system            namespace-controller                 1         53m
-kube-system            node-controller                      1         53m
-kube-system            persistent-volume-binder             1         53m
-kube-system            pod-garbage-collector                1         53m
-kube-system            pv-protection-controller             1         53m
-kube-system            pvc-protection-controller            1         53m
-kube-system            replicaset-controller                1         53m
-kube-system            replication-controller               1         53m
-kube-system            resourcequota-controller             1         53m
-kube-system            route-controller                     1         53m
-kube-system            service-account-controller           1         53m
-kube-system            service-controller                   1         53m
-kube-system            statefulset-controller               1         53m
-kube-system            ttl-controller                       1         53m
+...
 kubernetes-dashboard   default                              1         34m
 kubernetes-dashboard   kubernetes-dashboard                 1         34m
 ```
@@ -256,4 +225,115 @@ at the **namespace** level - at the cluster level there is also, ClusterRole and
 - resources: pods, services, nodes, deployments, secrets etc.
 
 **RoleBinding** binds a role to **subjects** (user, group, service account) i.e. a role binding **grants** a role's permissions to it subjects.
+
+#### Example
+
+It it best to use **kubectl exec** to jump into the k8s cluster. However, **ssh** can be used.
+
+To **ssh** we need a **pem** file - so generate a public/private key pair:
+
+![Key pair 1](images/key-pair-1.png)
+
+However, if you followed along already, then the section on [kops](kops.md) showed that we have a **pem** file with appropriate (view) permissions already set on said file. So to **ssh** using the **master node** url from the Amazon Console:
+
+```bash
+➜ ssh -i ~/.ssh/backwards-k8s.pem admin@ec2-3-8-120-151.eu-west-2.compute.amazonaws.com
+```
+
+```bash
+admin@ip-172-20-55-227:~$ ps -ef | grep kube-apiserver
+
+root      4553  4533  2 21:13 ?        00:00:14 /usr/local/bin/kube-apiserver --allow-privileged=true --anonymous-auth=false --apiserver-count=1 --authorization-mode=RBAC --basic-auth-file=/srv/kubernetes/basic_auth.csv --bind-address=0.0.0.0 --client-ca-file=/srv/kubernetes/ca.crt --cloud-provider=aws --enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,NodeRestriction,ResourceQuota --etcd-cafile=/etc/kubernetes/pki/kube-apiserver/etcd-ca.crt --etcd-certfile=/etc/kubernetes/pki/kube-apiserver/etcd-client.crt --etcd-keyfile=/etc/kubernetes/pki/kube-apiserver/etcd-client.key --etcd-servers-overrides=/events#https://127.0.0.1:4002 --etcd-servers=https://127.0.0.1:4001 --insecure-bind-address=127.0.0.1 --insecure-port=8080 --kubelet-client-certificate=/srv/kubernetes/kubelet-api.pem --kubelet-client-key=/srv/kubernetes/kubelet-api-key.pem --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP --proxy-client-cert-file=/srv/kubernetes/apiserver-aggregator.cert --proxy-client-key-file=/srv/kubernetes/apiserver-aggregator.key --requestheader-allowed-names=aggregator --requestheader-client-ca-file=/srv/kubernetes/apiserver-aggregator-ca.cert --requestheader-extra-headers-prefix=X-Remote-Extra- --requestheader-group-headers=X-Remote-Group --requestheader-username-headers=X-Remote-User --secure-port=443 --service-cluster-ip-range=100.64.0.0/13 --storage-backend=etcd3 --tls-cert-file=/srv/kubernetes/server.cert --tls-private-key-file=/srv/kubernetes/server.key --token-auth-file=/srv/kubernetes/known_tokens.csv --v=2 --logtostderr=false --alsologtostderr --log-file=/var/log/kube-apiserver.log
+```
+
+We see:
+
+```bash
+--authorization-mode=RBAC
+```
+
+If RBAC was not "on" we may see something like:
+
+--authorization-mode=AlwaysAllow
+
+which is insecure.
+
+Exit the ssh session, and list **roles**:
+
+```bash
+➜ kc get roles --all-namespaces
+NAMESPACE     NAME                                             AGE
+kube-public   system:controller:bootstrap-signer               14m
+kube-system   extension-apiserver-authentication-reader        14m
+kube-system   kops-controller                                  13m
+kube-system   system::leader-locking-kube-controller-manager   14m
+kube-system   system::leader-locking-kube-scheduler            14m
+kube-system   system:controller:bootstrap-signer               14m
+kube-system   system:controller:cloud-provider                 14m
+kube-system   system:controller:token-cleaner                  14m
+```
+
+and the **rolebindings**:
+
+```bash
+➜ kc get rolebindings --all-namespaces
+NAMESPACE     NAME                                                AGE
+kube-public   system:controller:bootstrap-signer                  26m
+kube-system   kops-controller                                     25m
+kube-system   system::extension-apiserver-authentication-reader   26m
+kube-system   system::leader-locking-kube-controller-manager      26m
+kube-system   system::leader-locking-kube-scheduler               26m
+kube-system   system:controller:bootstrap-signer                  26m
+kube-system   system:controller:cloud-provider                    26m
+kube-system   system:controller:token-cleaner                     26m
+```
+
+```bash
+➜ kc describe rolebinding kops-controller --namespace=kube-system
+Name:         kops-controller
+Labels:       k8s-addon=kops-controller.addons.k8s.io
+Annotations:  Role:
+  Kind:       Role
+  Name:       kops-controller
+Subjects:
+  Kind  Name                                               Namespace
+  ----  ----                                               ---------
+  User  system:serviceaccount:kube-system:kops-controller
+```
+
+Next, **clusterroles**:
+
+```bash
+➜ kc get clusterroles --all-namespaces
+NAME                                                                   AGE
+admin                                                                  19m
+cluster-admin                                                          19m
+edit                                                                   19m
+kops-controller                                                        19m
+kops:dns-controller                                                    19m
+kube-dns-autoscaler                                                    19m
+system:aggregate-to-admin                                              19m
+...
+```
+
+```bash
+➜ kc describe clusterrole system:heapster
+Name:         system:heapster
+Labels:       kubernetes.io/bootstrapping=rbac-defaults
+Annotations:  rbac.authorization.kubernetes.io/autoupdate: true
+PolicyRule:
+  Resources               Non-Resource URLs  Resource Names  Verbs
+  ---------               -----------------  --------------  -----
+  events                  []                 []              [get list watch]
+  namespaces              []                 []              [get list watch]
+  nodes                   []                 []              [get list watch]
+  pods                    []                 []              [get list watch]
+  deployments.extensions  []                 []              [get list watch]
+```
+
+## Access Control Flow
+
+![Access control flow](images/access-control-flow.png)
+
+
 
