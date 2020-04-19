@@ -19,3 +19,5 @@
   - [Dashboard](docs/dashboard.md)
 
   - [Monitoring](docs/monitoring.md)
+
+  - [Pods](docs/pods.md)

@@ -1,6 +1,68 @@
 # Monitoring
 
 ```bash
+~/workspace/kubernetes at ☸️ backwards.k8s.local
+➜ git clone https://github.com/kubernetes-sigs/metrics-server.git
+```
+
+We have to edit **metrics-server-deployment.yaml** under **metrics-server/deploy/1.8+**:
+
+```yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: kube-system
+  labels:
+    k8s-app: metrics-server
+spec:
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
+  template:
+    metadata:
+      name: metrics-server
+      labels:
+        k8s-app: metrics-server
+    spec:
+      serviceAccountName: metrics-server
+      volumes:
+      # mount in tmp so we can safely use from-scratch images and/or read-only containers
+      - name: tmp-dir
+        emptyDir: {}
+      containers:
+      - args:
+        - --cert-dir=/tmp
+        - --secure-port=4443
+        - --kubelet-preferred-address-types=InternalIP
+        - --kubelet-insecure-tls=true
+        name: metrics-server
+        image: k8s.gcr.io/metrics-server-amd64:v0.3.1
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: tmp-dir
+          mountPath: /tmp
+
+
+```
+
+Then deploy:
+
+```bash
+metrics-server/deploy/1.8+ at ☸️ backwards.k8s.local
+➜ kc apply -f .
+```
+
+Or:
+
+```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local took 4s
 ➜ kc top node
 Error from server (NotFound): the server could not find the requested resource (get services http:heapster:)
@@ -11,6 +73,15 @@ Ok, so we need to deploy [metrics server](https://github.com/kubernetes-sigs/met
 ```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
 ➜ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+```
+
+Check it is running:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
+➜ kubectl get deployment metrics-server -n kube-system
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   1/1     1            1           43s
 ```
 
 Try again:
@@ -510,4 +581,67 @@ Again we will have to add this port to our in-bounds rules on AWS. Then access t
 
 ## Grafana
 
-TODO
+With Prometheus deployed we'll follow a [tutorial](https://devopscube.com/setup-grafana-kubernetes/).
+
+First, a config map:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  prometheus.yaml: |-
+    {
+        "apiVersion": 1,
+        "datasources": [
+            {
+               "access":"proxy",
+                "editable": true,
+                "name": "prometheus",
+                "orgId": 1,
+                "type": "prometheus",
+                "url": "http://prometheus-service.monitoring.svc:8080",
+                "version": 1
+            }
+        ]
+    }
+```
+
+```bash
+kubernetes-prometheus at ☸️ backwards.k8s.local
+➜ kubectl create -f grafana-config-map.yaml
+```
+
+Next a deployment:
+
+```bash
+kubernetes-prometheus at ☸️ backwards.k8s.local
+➜ kubectl create -f grafana-deployment.yaml
+```
+
+Than a service:
+
+```bash
+kubernetes-prometheus at ☸️ backwards.k8s.local
+➜ kubectl create -f grafana-service.yaml
+```
+
+Again add our node port (32000) to our IP rules in AWS and then access one of the cluster nodes with said port.
+
+The Grafana default login credentials are:
+
+User: admin
+
+Pass: admin
+
+You will be asked to change the password e.g "scooby".
+
+We now need to setup a **dashboard** which can be done using a [template](https://grafana.com/grafana/dashboards?search=kubernetes) e.g. from [this template](https://grafana.com/grafana/dashboards/8588) choose the **template ID** of **8588** and import into Grafana:
+
+![Grafana import](images/import-grafana-template.png)
+
+After selecting (default) options:
+
+![Grafana](images/grafana.png)

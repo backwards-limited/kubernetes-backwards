@@ -142,11 +142,20 @@ As long as the cluster has the .k8s.local at the end of the name Kops will not u
 	--networking kubenet \
 	--name $NAME \
 	--master-size t2.micro \
-	--node-size t2.micro \
+	--node-size t3.small \
 	--zones eu-west-2a \
 	--ssh-public-key ~/.ssh/backwards-k8s.pub \
 	--yes
 ```
+
+Some AWS node prices:
+
+|          | CPU  | Memory | Instance Storage | Price            |
+| -------- | ---- | ------ | ---------------- | ---------------- |
+| t2.micro | 1    | 1 GiB  | EBS Only         | $0.0116 per Hour |
+| t2.small | 1    | 2 GiB  | EBS Only         | $0.023 per Hour  |
+| t3.micro | 2    | 1 GiB  | EBS Only         | $0.0104 per Hour |
+| t3.small | 2    | 2 GiB  | EBS Only         | $0.0208 per Hour |
 
 ## Validate
 
@@ -211,6 +220,23 @@ service/kubernetes      ClusterIP   100.64.0.1       <none>        443/TCP     1
 
 ```bash
 ➜ curl -i "http://$CLUSTER_DNS/demo/hello"
+```
+
+## Scaling
+
+To scale our kops cluster we can:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
+➜ kops edit ig nodes
+Using cluster from kubectl context: backwards.k8s.local
+```
+
+Then:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
+➜ kops update cluster --yes
 ```
 
 ## Destroy the Cluster

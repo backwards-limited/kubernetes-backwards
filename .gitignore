@@ -115,3 +115,5 @@ backwards-terraform
 terraform.tfvars
 terraform.tfstate.backup
 private_ips.txt
+
+kubernetes-mastery-on-aws/k8s/course-yaml
