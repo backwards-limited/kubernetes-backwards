@@ -142,7 +142,7 @@ As long as the cluster has the .k8s.local at the end of the name Kops will not u
 	--networking kubenet \
 	--name $NAME \
 	--master-size t2.micro \
-	--node-size t3.small \
+	--node-size t2.micro \
 	--zones eu-west-2a \
 	--ssh-public-key ~/.ssh/backwards-k8s.pub \
 	--yes

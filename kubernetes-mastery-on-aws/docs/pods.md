@@ -72,3 +72,17 @@ kubectl delete -f nginx-deploy.yaml
 ![Pod](images/pod.png)
 
 Think of a Pod as an **environment** that **containers run in** and persists until it is deleted. Containers within a Pod **share** its **IP address** and **port space** - Containers inside a Pod communicate using the **localhost** IP address. Containers running in different Pods communicate using the Pod's unique IP address.
+
+Pods can specify a set of **shared storage volumes** - all containers in the Pod can access these shared volumes. Kubernetes supports several types of volumes e.g.
+
+- **emptyDir**: Data is **erased** when the Pod is removed
+- **awsElasticBlockStore (AWS EBS)**: Data is **preserved** when the Pod is removed.
+- **cephfs (CephFS volume)**: Data is **preserved** when the Pod is removed and also supports **multiple writers**
+
+<u>Pods do not by themselves self-heal within Kubernetes.</u>
+
+**Controllers** are responsible for pod replication, software roll-outs and self-healing i.e. they make Pods durable. Examples of controllers are:
+
+- Deployment
+- StatefulSet
+- DaemonSet
