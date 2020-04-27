@@ -86,3 +86,61 @@ Pods can specify a set of **shared storage volumes** - all containers in the Pod
 - Deployment
 - StatefulSet
 - DaemonSet
+
+## Create
+
+Take a look at [pod-nginx.yaml](../k8s/pods/pod-nginx.yaml):
+
+```yaml
+apiVersion: v1                # The API version (v1 currently)
+kind: Pod                     # The Kind of API resource
+metadata:       
+  name: nginx                 # Name of this Pod that must be unique within the namespace
+spec:                         # Specification of Pod's contents - list of containers to run
+  containers:                 # Start the container listing this way
+    - name: nginx             # Nickname for the container in this Pod. Must be unique.
+      image: nginx:1.7.9      # Name of the Docker image that Kubernetes will pull.
+      ports:
+        - containerPort: 80   # The port used by the container.
+                              # This port is accessible from all cluster nodes. 
+                              # In k8s you don't publish container ports like you do in Docker. 
+      resources:
+        limits:
+          memory: 256Mi
+          cpu: 250m
+```
+
+The following will launch one pod running nginx:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx.yaml
+pod/nginx created
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          39s
+```
+
+To view the complete live pod configuration:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods -o yaml
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods nginx -o wide
+NAME   READY  STATUS   RESTARTS  AGE   IP           NODE
+nginx  1/1    Running  0         10m   100.96.2.3   ip-172-20-48-119.eu-west-2.compute.internal
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe pods nginx
+```
+

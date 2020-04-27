@@ -1,0 +1,15 @@
+apiVersion: v1                # The API version (v1 currently)
+kind: Pod                     # The Kind of API resource
+metadata:       
+  name: nginx                 # Name of this Pod. A Pod's name must be unique within the namespace
+spec:                         # Specification of Pod's contents e.g. A list of containers it will run
+  containers:                 # Start the container listing this way
+    - name: nginx             # A nickname for the container in this Pod. Must be unique with this Pod
+      image: nginx:1.7.9      # Name of the Docker image that Kubernetes will pull from a registry (default is Docker Hub)
+      ports:
+        - containerPort: 80   # The port used by the container. This port is accessible from all cluster nodes. 
+                              # Note: In Kubernetes, you don't publish container ports like you do in Docker. 
+      resources:
+        limits:
+          memory: 256Mi
+          cpu: 250m
