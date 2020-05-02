@@ -134,13 +134,128 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.
 
 ```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
-➜ kc get pods nginx -o wide
+➜ kc get pods/nginx -o wide
 NAME   READY  STATUS   RESTARTS  AGE   IP           NODE
-nginx  1/1    Running  0         10m   100.96.2.3   ip-172-20-48-119.eu-west-2.compute.internal
+nginx  1/1    Running   0        2m26s 100.96.1.4   ip-172-20-33-58.eu-west-2.compute.internal
 ```
 
 ```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
 ➜ kc describe pods nginx
 ```
+
+## Port forward
+
+Currently the nginx pod is only accessible on the IP address 100.96.1.4 within the cluster. We can access this pod from outside the cluster via **port forwarding**.
+
+kubectl can create a secure tunnel from some local environment it is running on (such as a VM) to the Kubernetes cluster and forward a local port on said local environment to a port on the pod. Let's forward the local port of 8080 to the port of 80 on the pod.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc port-forward pods/nginx 8080:80
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+```
+
+Let's also send the above command to the background by first hitting **Ctl-Z** and the typing in **bg**:
+
+```bash
+^Z
+zsh: suspended  kubectl port-forward pods/nginx 8080:80
+
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local took 1m 28s
+✦ ➜ bg
+[1]  + continued  kubectl port-forward pods/nginx 8080:80
+```
+
+And we can access nginx with **httpie**, **curl** or **web browser**:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+✦ ➜ http localhost:8080
+Handling connection for 8080
+HTTP/1.1 200 OK
+...
+<body>
+<h1>Welcome to nginx!</h1>
+```
+
+## Run command inside (nginx) Container
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local took 2s
+➜ kc exec -it pod/nginx -- /bin/bash
+root@nginx:/# ls
+bin  boot  dev	etc  home  lib	lib64  media  mnt  opt	proc  root  run ...
+```
+
+When there are multiple containers within a pod e.g.
+
+```bash
+➜ kc exec -it pod/nginx --container nginx -- /bin/bash
+```
+
+## View Pods environment variables
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc exec pod/nginx -- env
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=nginx
+KUBERNETES_PORT_443_TCP_ADDR=100.64.0.1
+KUBERNETES_SERVICE_HOST=100.64.0.1
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_PORT=tcp://100.64.0.1:443
+KUBERNETES_PORT_443_TCP=tcp://100.64.0.1:443
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_PORT=443
+NGINX_VERSION=1.7.9-1~wheezy
+HOME=/root
+```
+
+And lots of other ways such as:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc exec pod/nginx -- hostname
+nginx
+
+➜ kc exec pod/nginx -- hostname -f
+nginx
+```
+
+## Copy files from/to (nginx) Container
+
+Copy the nginx index.html from the Pod into our local environment:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc cp nginx:usr/share/nginx/html/index.html index.html
+
+➜ ls -las
+...
+8 -rw-r--r--   1 davidainslie  staff  612  2 May 23:06 index.html
+```
+
+Edit the file e.g. adding a **h2** with **Kubernetes**, and copy the file back to the pod:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc cp index.html nginx:usr/share/nginx/html/index.html
+```
+
+Let's check if the copy was successful:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc exec nginx -- cat /usr/share/nginx/html/index.html
+...
+<body>
+<h1>Welcome to nginx!</h1>
+<h2>Kubernetes</h2>
+```
+
+
 
