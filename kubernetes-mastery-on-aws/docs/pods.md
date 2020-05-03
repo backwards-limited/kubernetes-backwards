@@ -257,5 +257,128 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.
 <h2>Kubernetes</h2>
 ```
 
+## Labels
 
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --show-labels
+NAME    READY   STATUS    RESTARTS   AGE   LABELS
+nginx   1/1     Running   0          84s   <none>
+```
+
+Add a label:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc label pod/nginx "tier=frontend"
+```
+
+We can again "show labels", but we can get a slightly different view with:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods -L tier
+NAME    READY   STATUS    RESTARTS   AGE     TIER
+nginx   1/1     Running   0          5m10s   frontend
+```
+
+Let's filter by label:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --selector="tier=frontend"
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          7m33s
+```
+
+or an equivalent command is:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods -l "tier=frontend"
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          8m47s
+```
+
+Another way for the above filter:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --selector="tier!=backend"
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          10m
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --selector="tier in (frontend, backend)"
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          16m
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --selector="tier notin (tier1, tier2)"
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          17m
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --selector="tier"
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          18m
+```
+
+Let's remove the above label:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local took 2s
+➜ kc label pod/nginx "tier-"
+pod/nginx labeled
+
+➜ kc get pods --show-labels
+NAME    READY   STATUS    RESTARTS   AGE   LABELS
+nginx   1/1     Running   0          12m   <none>
+```
+
+We can still select (filter) for a non-existing key e.g.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods --selector='!tier'
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          22m
+```
+
+**Noting we have to use single quotes - as yet, I do not know.**
+
+Now follows an example of a Pod manifest with labels:
+
+```yaml
+apiVersion: v1               # The API version (v1 currently)
+kind: Pod                    # The Kind of API resource
+metadata:                    # Describes the Pod and its labels
+  name: nginx            # Name of this Pod. A Pod's name must be unique within the namespace
+  labels: # Optional. Labels are key:value pairs. Use is to group and target sets of pods.
+    tier: frontend       # Tag your pods with identifying attributes that are meaningful
+    app: nginx
+spec:                   # Specification of Pod's contents e.g. A list of containers it will run
+  containers:                # Start the container listing this way
+    - name: nginx      # A nickname for the container in this Pod. Must be unique with this Pod
+      image: nginx:1.7.9     # Name of the Docker image that Kubernetes will pull
+      ports:
+        - containerPort: 80  # The port used by the container. Accessible from all nodes.                               
+      resources:
+        limits:
+          memory: 256Mi
+          cpu: 250m
+```
+
+To **relabel** you have to include **--overwrite** e.g.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc label pod/nginx "app=mynginx" --overwrite
+```
 

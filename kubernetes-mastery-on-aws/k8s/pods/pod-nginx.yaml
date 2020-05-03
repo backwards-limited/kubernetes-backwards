@@ -1,7 +1,10 @@
 apiVersion: v1                # The API version (v1 currently)
 kind: Pod                     # The Kind of API resource
-metadata:       
+metadata:                     # Describes the Pod and its labels
   name: nginx                 # Name of this Pod. A Pod's name must be unique within the namespace
+  labels:                     # Optional. Labels are arbitrary key:value pairs. Primary use is to group and target sets of pods.
+    tier: frontend            # Tag your pods with identifying attributes that are meaningful and relevant to your users
+    app: nginx
 spec:                         # Specification of Pod's contents e.g. A list of containers it will run
   containers:                 # Start the container listing this way
     - name: nginx             # A nickname for the container in this Pod. Must be unique with this Pod
