@@ -382,3 +382,138 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.
 ➜ kc label pod/nginx "app=mynginx" --overwrite
 ```
 
+## Update
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe pod/nginx
+Name:         nginx
+...
+Containers:
+  nginx:
+    Container ID:   docker://21a2d45d1a3ffb5b43a7f0975f813ca073414769a535cf2054062f7935e44461
+    Image:          nginx:1.7.9
+```
+
+By apply a manifest with a newer version of our (nginx) image, we update the software e.g.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-upgrade.yaml
+pod/nginx configured
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local took 50s
+➜ kc describe pod/nginx
+Name:         nginx
+...
+Containers:
+  nginx:
+    Container ID:   docker://aceb0d80462f9cb6e889a4b6892eec8a6f149c88e0c3445e9296d0daf4ff173f
+    Image:          nginx:latest
+```
+
+## Log
+
+With nginx Pod running let's first generate some logging:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc port-forward pods/nginx 8080:80
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+^Z
+zsh: suspended  kubectl port-forward pods/nginx 8080:80
+
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local took 7s
+➜ bg
+[1]  + continued  kubectl port-forward pods/nginx 8080:80
+
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ http localhost:8080
+Handling connection for 8080
+HTTP/1.1 200 OK
+...
+```
+
+and we'll have a log:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc logs pods/nginx
+127.0.0.1 - - [05/May/2020:21:25:41 +0000] "GET / HTTP/1.1" 200 612 "-" "HTTPie/2.1.0" "-"
+```
+
+and to follow the logs:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc logs -f pods/nginx
+127.0.0.1 - - [05/May/2020:21:25:41 +0000] "GET / HTTP/1.1" 200 612 "-" "HTTPie/2.1.0" "-"
+```
+
+To see logs from a **previous instantiation of a Pod**:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc logs --previous pods/nginx
+```
+
+## Annotate
+
+**Labels** hold **identifying** information while **annotations** hold **non-identifying** information. The primary purpose of annotations is to assist **tools** and **libraries**. Let's add some annotations to our (nginx) pod:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc annotate pods/nginx build=two builder=joe
+pod/nginx annotated
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods/nginx -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    build: two
+    builder: joe
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"app":"nginx","tier":"frontend"},"name":"nginx","namespace":"default"},"spec":{"containers":[{"image":"nginx:latest","name":"nginx","ports":[{"containerPort":80}],"resources":{"limits":{"cpu":"250m","memory":"256Mi"}}}]}}
+...
+```
+
+We see the new annotations (and a useful one that shows how k8s performs an update via a diff).
+
+To just see the annotations, use a **jsonpath**:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pods/nginx -o jsonpath='{.metadata.annotations}'
+map[build:two builder:joe kubectl.kubernetes.io/last-applied-configuration:{"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"app":"nginx","tier":"frontend"},"name":"nginx","namespace":"default"},"spec":{"containers":[{"image":"nginx:latest","name":"nginx","ports":[{"containerPort":80}],"resources":{"limits":{"cpu":"250m","memory":"256Mi"}}}]}}
+]
+```
+
+Let's **overwrite** one of our new annotations:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc annotate pods/nginx build=3 --overwrite
+```
+
+and to remove said annotations:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc annotate pods/nginx "build-"
+```
+
+## Delete
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc delete pods/nginx
+```
+
+By default k8s initiates a graceful shutdown over 30 seconds. Upon receiving a **delete** k8s first sends a **TERM signal** to the Pod application. After 30 seconds a **kill signal** will be sent.

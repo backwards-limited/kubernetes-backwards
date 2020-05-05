@@ -11,7 +11,7 @@ metadata:                                 # Describes the Pod and its labels
 spec:                                     # Specification of Pod's contents e.g. A list of containers it will run
   containers:                             # Start the container listing this way
     - name: nginx                         # A nickname for the container in this Pod. Must be unique with this Pod
-      image: nginx:1.7.9                  # Name of the Docker image that Kubernetes will pull from a registry (default is Docker Hub)
+      image: nginx:latest   	            # Update the nginx container from Ver. 1.7.9 to the latest
       ports:
         - containerPort: 80               # The port used by the container. This port is accessible from all cluster nodes. 
                                           # Note: In Kubernetes, you don't publish container ports like you do in Docker. 

@@ -87,3 +87,9 @@ INFO  started: Metals version 0.8.3 in workspace '/Users/davidainslie/workspace/
 INFO  time: initialize in 0.3s
 WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
 INFO  shutting down Metals
+INFO  started: Metals version 0.8.4 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+INFO  time: initialize in 0.29s
+WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/HMRC/shop/src/test/scala/com/backwards/shop/PriceSpec.scala
+INFO  no build target: using presentation compiler with only scala-library
+INFO  shutting down Metals
