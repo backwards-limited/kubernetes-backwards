@@ -1,95 +1,35 @@
 # Monitoring
 
+We want to set up [metrics server](https://github.com/kubernetes-sigs/metrics-server). As we are using **kops** we follow the [kops metrics server](https://github.com/kubernetes/kops/blob/master/addons/metrics-server/README.md) README and a nice [article](https://medium.com/@sanjay.chauhan164/https-medium-com-sanjay-chauhan164-kubernetes-with-kops-on-aws-20debcf3e1db) on Medium:
+
 ```bash
-~/workspace/kubernetes at ☸️ backwards.k8s.local
-➜ git clone https://github.com/kubernetes-sigs/metrics-server.git
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kops edit cluster
 ```
 
-We have to edit **metrics-server-deployment.yaml** under **metrics-server/deploy/1.8+**:
+At which point we add the following:
 
 ```yaml
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: metrics-server
-  namespace: kube-system
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: metrics-server
-  namespace: kube-system
-  labels:
-    k8s-app: metrics-server
-spec:
-  selector:
-    matchLabels:
-      k8s-app: metrics-server
-  template:
-    metadata:
-      name: metrics-server
-      labels:
-        k8s-app: metrics-server
-    spec:
-      serviceAccountName: metrics-server
-      volumes:
-      # mount in tmp so we can safely use from-scratch images and/or read-only containers
-      - name: tmp-dir
-        emptyDir: {}
-      containers:
-      - args:
-        - --cert-dir=/tmp
-        - --secure-port=4443
-        - --kubelet-preferred-address-types=InternalIP
-        - --kubelet-insecure-tls=true
-        name: metrics-server
-        image: k8s.gcr.io/metrics-server-amd64:v0.3.1
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: tmp-dir
-          mountPath: /tmp
-
-
+kubelet:
+  anonymousAuth: false 
+  authenticationTokenWebhook: true
+  authorizationMode: Webhook
 ```
 
-Then deploy:
+After saving then:
 
 ```bash
-metrics-server/deploy/1.8+ at ☸️ backwards.k8s.local
-➜ kc apply -f .
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kops update cluster --yes
+
+➜ kops rolling-update cluster --yes
 ```
 
-Or:
+Finally:
 
 ```bash
-kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local took 4s
-➜ kc top node
-Error from server (NotFound): the server could not find the requested resource (get services http:heapster:)
-```
-
-Ok, so we need to deploy [metrics server](https://github.com/kubernetes-sigs/metrics-server):
-
-```bash
-kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
-➜ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
-```
-
-Check it is running:
-
-```bash
-kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
-➜ kubectl get deployment metrics-server -n kube-system
-NAME             READY   UP-TO-DATE   AVAILABLE   AGE
-metrics-server   1/1     1            1           43s
-```
-
-Try again:
-
-```bash
-kubernetes-backwards/kubernetes-mastery-on-aws/k8s at ☸️ backwards.k8s.local
-➜ kc top node
-error: metrics not available yet
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.8.x.yaml
 ```
 
 ## Prometheus

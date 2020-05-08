@@ -517,3 +517,37 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.
 ```
 
 By default k8s initiates a graceful shutdown over 30 seconds. Upon receiving a **delete** k8s first sends a **TERM signal** to the Pod application. After 30 seconds a **kill signal** will be sent.
+
+## Resources
+
+- Resource **requests** are **guaranteed** by Kubernetes
+- Resource **limits** are the maximum amount of CPU and Memory a container can use
+
+![Resources](images/resources.png)
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx.yaml
+pod/nginx created
+
+➜ kc describe pods/nginx
+Name:         nginx
+...
+Containers:
+  nginx:
+    ...
+    Limits:
+      cpu:     1
+      memory:  512Mi
+    Requests:
+      cpu:        500m
+      memory:     64Mi
+...
+QoS Class:       Burstable
+```
+
+## Liveness and Readiness probes
+
+By using a **liveness probe** Kubelet can detect whether a process is healthy and functioning well. Most common way to check for liveness is with **HTTP GET**, though you could execute a command or open a TCP socket to the container on a specific port.
+
+A **readiness probe** is used to detect whether a container is **ready** to receive traffic through Kubernetes **services**. A readiness probe tells Kubernetes **not to send traffic to containers until the probe is successful**.
