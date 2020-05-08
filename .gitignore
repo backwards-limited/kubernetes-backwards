@@ -117,3 +117,4 @@ terraform.tfstate.backup
 private_ips.txt
 
 kubernetes-mastery-on-aws/k8s/course-yaml
+kubernetes-mastery-on-aws/k8s/.vagrant
