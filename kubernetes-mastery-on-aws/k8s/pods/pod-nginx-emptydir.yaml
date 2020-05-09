@@ -9,12 +9,23 @@ metadata:                                   # Describes the Pod and its labels
     pod-url: http://mysite.com/nginx-pod    # URL containing detailed info about this Pod
     supported-by: 1-888-222-1800            # Phone or pager number to reach those responsible for supporting this Pod
 spec:                                       # Specification of Pod's contents e.g. A list of containers it will run
+  volumes:                                  # Define all the volumes available to your containers
+    - name: www-data                        # Name the volume
+      emptyDir: {}                          # Creates a shared Volume of type=emptyDir. It will exist as long as the Pod is running on the node.
+                                            # It can persist data across container failures and restarts.
+                                            # Data will not persist if the node dies and the pod moves to another node.
+                                            # Typically two containers will be sharing this emptyDir Volume.
+                                            # One will be pulling files from a remote Git location and the other will be serving the data.
+                                            # So even if the Pod moves, it will work.
   containers:                               # Start the container listing this way
     - name: nginx                           # A nickname for the container in this Pod. Must be unique with this Pod
       image: nginx:1.13.8                   # Name of the Docker image that Kubernetes will pull from a registry (default is Docker Hub)
       ports:  
         - containerPort: 80                 # The port used by the container. This port is accessible from all cluster nodes. 
-                                            # Note: In Kubernetes, you don't publish container ports like you do in Docker.  
+                                            # Note: In Kubernetes, you don't publish container ports like you do in Docker. 
+      volumeMounts:                         # Mount volumes within a container using volumeMounts
+        - mountPath: /usr/share/nginx/html  # Mount path within the container
+          name: www-data                    # Name must match the volume name defined above in the Volumes section 
       livenessProbe:                        # Checks if the nginx application is running properly. If not Kubelet will kill and restart it
         httpGet:                            # Kubelet will perform a HTTP GET to the specified path and port. Success codes are 200-399 (inclusive)
           path: /

@@ -7,6 +7,15 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s/course-yaml at ☸️ backwar
 ➜ git clone https://github.com/naveenjoy/k8s-yaml.git
 ```
 
+The manifest we'll be following along with is:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ ls -las
+...
+16 -rw-r--r--   1 davidainslie  staff  4474  9 May 22:29 pod-nginx.yaml
+```
+
 ## Kubectl
 
 A sidebar...
@@ -551,3 +560,59 @@ QoS Class:       Burstable
 By using a **liveness probe** Kubelet can detect whether a process is healthy and functioning well. Most common way to check for liveness is with **HTTP GET**, though you could execute a command or open a TCP socket to the container on a specific port.
 
 A **readiness probe** is used to detect whether a container is **ready** to receive traffic through Kubernetes **services**. A readiness probe tells Kubernetes **not to send traffic to containers until the probe is successful**.
+
+## Volume
+
+A Docker container's file system is **ephemeral**. Without a **Volume**, after restart a container will start with a clean state.
+
+A **Volume** provides persistent storage to the Pod.
+
+Take a look at [emptydir manifest](../k8s/pods/pod-nginx-emptydir.yaml).
+
+**emptyDir** Volume type: Data stored in an emptyDir Volume only lasts for the **life of the Pod**. Data **will not** persist when the Pod is terminated and recreated. Primary use-cases of an emptyDir Volume:
+
+- As a data cache
+- As a shared storage space that syncs remotely with a Git repository
+- As a temporary file sharing space between a Pod's containers
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe pod/nginx
+Name:         nginx
+...
+Containers:
+  nginx:
+    ...
+    Mounts:
+      /usr/share/nginx/html from www-data (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-6z97t (ro)
+...
+Volumes:
+  www-data:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+...    
+```
+
+Let's check/test the Volume:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc port-forward nginx 8080:80 &
+
+➜ echo "nginx server running on an AWS Kubernetes cluster" > index.html
+
+➜ kc cp index.html pod/nginx:/usr/share/nginx/html/index.html
+
+➜ curl http://localhost:8080
+```
+
+We can **exec** onto the pod to take a look at the mount:
+
+```bash
+➜ kc exec -it pod/nginx -- /bin/bash
+
+root@nginx:/# cat /proc/mounts
+...
+/dev/nvme0n1p1 /user/share/nginx/html
+```
+
