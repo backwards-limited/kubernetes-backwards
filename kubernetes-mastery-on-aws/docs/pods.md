@@ -561,11 +561,13 @@ By using a **liveness probe** Kubelet can detect whether a process is healthy an
 
 A **readiness probe** is used to detect whether a container is **ready** to receive traffic through Kubernetes **services**. A readiness probe tells Kubernetes **not to send traffic to containers until the probe is successful**.
 
-## Volume
+## Volumes
 
 A Docker container's file system is **ephemeral**. Without a **Volume**, after restart a container will start with a clean state.
 
 A **Volume** provides persistent storage to the Pod.
+
+## emptyDir Volume
 
 Take a look at [emptydir manifest](../k8s/pods/pod-nginx-emptydir.yaml).
 
@@ -616,3 +618,60 @@ root@nginx:/# cat /proc/mounts
 /dev/nvme0n1p1 /user/share/nginx/html
 ```
 
+## hostPath Volume
+
+The **hostPath** Volume **mounts a file or directory** from the host node's filesystem into the Pod.
+
+Any arbitrary location on the node can be mounted into the container e.g. running **cAdvisor** in a container needs access to **/sys** directory.
+
+Take a look at [hostpath manifest](../k8s/pods/pod-ubuntu-hostpath.yaml).
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-ubuntu-hostpath.yaml
+pod/hostpath-test created
+
+➜ kc exec -it pod/hostpath-test -- /bin/bash
+root@hostpath-test:/# ls /var/run/docker.sock
+/var/run/docker.sock
+```
+
+Now we'll use **curl** to talk to Docker to list containers:
+
+```bash
+root@hostpath-test:/# apt-get update && apt-get install -y curl
+```
+
+```bash
+root@hostpath-test:/# curl --unix-socket /var/run/docker.sock -H 'Content-Type: application/json' http://localhost/containers/json
+
+[{"Id":"4edef502a2cce579e500c1493bc810ed11dad7c3b4131d5074f13fb8d85d9d56","Names":["/k8s_ubuntu_hostpath-test_default_a43a19c2-6e1c-44e7-9324-a11efb54ae5f_0"],"Image":"ubuntu@sha256:db6697a61d5679b7ca69dbde3dad6be0d17064d5b6b0e9f7be8d456ebb337209","ImageID":"sha256:005d2078bdfab5066ae941cea93f644f5fd25521849c870f4e1496f4526d1d5b","Command":"/bin/bash -c -- 'while true; do sleep 10; done;'","Created":1589122950,"Ports":[],"Labels":{"annotation.io.kubernetes.container.hash":"81bad010","annotation.io.kubernetes.container.restartCount":"0","annotation.io.kubernetes.container.terminationMessagePath":"/dev/termination-log","annotation.io.kubernetes.container.terminationMessagePolicy":"File","annotation.io.kubernetes.pod.terminationGracePeriod":"30","io.kubernetes.container.logpath":"/var/log/pods/default_hostpath-test_a43a19c2-6e1c-44e7-9324-a11efb54ae5f/ubuntu/0.log","io.kubernetes.container.name":"ubuntu","io.kubernetes.docker.type":"container","io.kubernetes.pod.name":"hostpath-test","io.kubernetes.pod.namespace":"default","io.kubernetes.pod.uid":"a43a19c2-6e1c-44e7-9324-a11efb54ae5f","io.kubernetes.sandbox.id":"b902509005a9d8ca83a23c26424baedda160ec211d61f90a692a626a61795ac9"},"State":"running","Status":"Up 6 minutes","HostConfig":{"NetworkMode":"container:b902509005a9d8ca83a23c26424baedda160ec211d61f90a692a626a61795ac9"}
+...
+```
+
+## AWS Dynamic Persistent EBS Volume
+
+- The **awsElasticBlockStore** volume type mounts an **AWS EBS** volume into the Pod
+- The AWS EBS volume can persist data independent of a Pod's lifetime
+- An EBS volume can be **pre-populated** with data
+- The data can be **handed off** between Pods as they move from one k8s node (i.e. an EC2 instance) to another
+
+To provision an EBS volume **dynamically** for your Pod, you'll need to first create an object of kind **StorageClass**.
+
+Take a look at [aws-ebs-storageclass.yaml](../k8s/pods/aws-ebs-storageclass.yaml):
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-aws-ebs            # Users request a particular Storage class
+provisioner: kubernetes.io/aws-ebs  # Determines the volume plugin used for provisioning PVs
+# A general purpose SSD backed Volume Type in AWS EBS
+parameters:
+  type: gp2
+reclaimPolicy: Delete               # Set to either Delete (default) or Retain 
+```
+
+Next, refer to the StorageClass inside an object of kind **PersistentVolumeClaim**. The PVC will use the StorageClass to dynamically provision the EBS volume.
+
+![Dynamic AWS Volume Provisioning](images/dynamic-aws-volume.png)

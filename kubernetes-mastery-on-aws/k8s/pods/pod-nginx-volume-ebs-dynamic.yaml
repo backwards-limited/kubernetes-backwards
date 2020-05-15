@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    tier: frontend
+    app:  nginx
+  annotations:
+    description: Nginx container with an AWS EBS Persistent Volume
+spec:
+  volumes:
+    - name: aws-ebs                           # Name of the AWS EBS Volume 
+      persistentVolumeClaim:                  # Pods access dynamic AWS storage by using the claim as a volume
+        claimName: aws-ebs-claim              # Must match the name of the AWS Persistent Volume Claim we created
+  containers:
+    - name: nginx
+      image: nginx:1.13.8
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html    # Mount path within the container
+          name: aws-ebs                       # Name must match the AWS EBS volume name defined in spec.Volumes
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "64Mi"
+        limits:
+          cpu: "1"
+          memory: "512Mi"
