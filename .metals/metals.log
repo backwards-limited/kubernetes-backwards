@@ -93,3 +93,9 @@ WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwar
 WARN  no build target for: /Users/davidainslie/David/Backwards/Jobs/HMRC/shop/src/test/scala/com/backwards/shop/PriceSpec.scala
 INFO  no build target: using presentation compiler with only scala-library
 INFO  shutting down Metals
+2020.05.16 11:32:44 INFO  started: Metals version 0.9.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+2020.05.16 11:32:45 INFO  time: initialize in 0.4s
+2020.05.16 11:32:45 WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+May 16, 2020 11:32:48 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTraceNotification
+2020.05.16 23:09:41 INFO  shutting down Metals

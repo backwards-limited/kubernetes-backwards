@@ -658,7 +658,11 @@ root@hostpath-test:/# curl --unix-socket /var/run/docker.sock -H 'Content-Type: 
 
 To provision an EBS volume **dynamically** for your Pod, you'll need to first create an object of kind **StorageClass**.
 
-Take a look at [aws-ebs-storageclass.yaml](../k8s/pods/aws-ebs-storageclass.yaml):
+Next, refer to the StorageClass inside an object of kind **PersistentVolumeClaim**. The PVC will use the StorageClass to dynamically provision the EBS volume.
+
+![Dynamic AWS Volume Provisioning](images/dynamic-aws-volume.png)
+
+So first create the StorageClass using [aws-ebs-storageclass.yaml](../k8s/pods/aws-ebs-storageclass.yaml):
 
 ```yaml
 apiVersion: storage.k8s.io/v1
@@ -666,12 +670,314 @@ kind: StorageClass
 metadata:
   name: standard-aws-ebs            # Users request a particular Storage class
 provisioner: kubernetes.io/aws-ebs  # Determines the volume plugin used for provisioning PVs
-# A general purpose SSD backed Volume Type in AWS EBS
 parameters:
-  type: gp2
-reclaimPolicy: Delete               # Set to either Delete (default) or Retain 
+  type: gp2                         # General purpose SSD backed Volume Type in AWS EBS
+reclaimPolicy: Delete               # Set to either Delete (default) or Retain
 ```
 
-Next, refer to the StorageClass inside an object of kind **PersistentVolumeClaim**. The PVC will use the StorageClass to dynamically provision the EBS volume.
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f aws-ebs-storageclass.yaml
+storageclass.storage.k8s.io/standard-aws-ebs created
+```
 
-![Dynamic AWS Volume Provisioning](images/dynamic-aws-volume.png)
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get sc
+NAME               PROVISIONER             AGE
+default            kubernetes.io/aws-ebs   48m
+gp2 (default)      kubernetes.io/aws-ebs   48m
+standard-aws-ebs   kubernetes.io/aws-ebs   34s
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe sc standard-aws-ebs
+Name:            standard-aws-ebs
+IsDefaultClass:  No
+Annotations:     kubectl.kubernetes.io/last-applied-configuration={"apiVersion":"storage.k8s.io/v1","kind":"StorageClass","metadata":{"annotations":{},"name":"standard-aws-ebs"},"parameters":{"type":"gp2"},"provisioner":"kubernetes.io/aws-ebs","reclaimPolicy":"Delete"}
+
+Provisioner:           kubernetes.io/aws-ebs
+Parameters:            type=gp2
+AllowVolumeExpansion:  <unset>
+MountOptions:          <none>
+ReclaimPolicy:         Delete
+VolumeBindingMode:     Immediate
+Events:                <none>
+```
+
+Now we need to create a Persistent Volume Claim where our manifest is [aws-ebs-persistent-volume-claim.yaml](../k8s/pods/aws-ebs-persistent-volume-claim.yaml):
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+	# This claim results in an AWS SSD Persistent Disk being automatically provisioned
+  name: aws-ebs-claim
+spec:
+	# Volume can be mounted as read-write by a single node (only option supported in AWS EBS)
+  accessModes:
+    - ReadWriteOnce
+  # This links this PersistentVolumeClaim Object to the AWS Storage Class
+	# This name must match the AWS Storage Class
+	storageClassName: standard-aws-ebs
+  resources:
+    requests:
+    	# 1GB volume is requested from AWS
+      storage: 1Gi
+```
+
+Note when replicating a stateful Pod (such as MySql) they will require their own unique PersistentVolumeClaim object. So you will need a PersistentVolumeClaim template to be used by each **replica** - this is used in conjunction with a **StatefulSet**.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f aws-ebs-persistent-volume-claim.yaml
+persistentvolumeclaim/aws-ebs-claim created
+```
+
+```
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get pvc
+NAME            STATUS   VOLUME                                     CAPACITY   STORAGECLASS
+aws-ebs-claim   Bound    pvc-7cfac39a-e1a9-4a44-9c63-e2b920451cb8   1Gi        standard-aws-ebs
+```
+
+and we can also see said volume in AWS console:
+
+![Dynamic volume](images/dynamic-volume.png)
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe pvc aws-ebs-claim
+Name:          aws-ebs-claim
+Namespace:     default
+StorageClass:  standard-aws-ebs
+Status:        Bound
+Volume:        pvc-7cfac39a-e1a9-4a44-9c63-e2b920451cb8
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed: yes
+               pv.kubernetes.io/bound-by-controller: yes
+               volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/aws-ebs
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      1Gi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Mounted By:    <none>
+Events:
+  Type    Reason                 Age    From                         Message
+  ----    ------                 ----   ----                         -------
+  Normal  ProvisioningSucceeded  6m29s  persistentvolume-controller  Successfully provisioned volume pvc-7cfac39a-e1a9-4a44-9c63-e2b920451cb8 using kubernetes.io/aws-ebs
+```
+
+So now we want to mount this (available) volume into our Pod, where the pod manifest using the pvc is [pod-nginx-volume-ebs-dynamic.yaml](../k8s/pods/pod-nginx-volume-ebs-dynamic.yaml):
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    tier: frontend
+    app:  nginx
+  annotations:
+    description: Nginx container with an AWS EBS Persistent Volume
+spec:
+  volumes:
+    - name: aws-ebs              # Name of the AWS EBS Volume 
+      persistentVolumeClaim:     # Pods access dynamic AWS storage by using claim as a volume
+        claimName: aws-ebs-claim # Must match name of AWS Persistent Volume Claim we created
+  containers:
+    - name: nginx
+      image: nginx:1.13.8
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html # Mount path within the container
+          name: aws-ebs                    # Name must match the AWS EBS volume name
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "64Mi"
+        limits:
+          cpu: "1"
+          memory: "512Mi"
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-volume-ebs-dynamic.yaml
+pod/nginx created
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe pod/nginx
+Name:         nginx
+...
+Volumes:
+  aws-ebs:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim
+...    
+Events:
+  Message
+  -------
+  AttachVolume.Attach succeeded for volume "pvc-7cfac39a-e1a9-4a44-9c63-e2b920451cb8"
+```
+
+and now we see the volume "in use":
+
+![Dynamic volume in use](images/dynamic-volume-in-use.png)
+
+To test the persistence we can copy a new index.html into the pod:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc cp index.html nginx:/usr/share/nginx/html/index.html
+
+➜ kc port-forward nginx 8080:80 &
+[1] 30712
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+
+➜ http localhost:8080
+HTTP/1.1 200 OK
+...
+nginx server running on an AWS Kubernetes cluster
+```
+
+We delete and then recreate the Pod:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc delete pod/nginx
+pod "nginx" deleted
+
+➜ kc apply -f pod-nginx-volume-ebs-dynamic.yaml
+pod/nginx created
+
+# Kill previous port fowarding
+➜ pkill kc
+
+➜ kc port-forward nginx 8080:80 &
+[2] 31504
+
+➜ http localhost:8080
+HTTP/1.1 200 OK
+...
+nginx server running on an AWS Kubernetes cluster
+```
+
+Finally we can cleanup:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc delete pod/nginx
+pod "nginx" deleted
+
+➜ kc delete pvc/aws-ebs-claim
+persistentvolumeclaim "aws-ebs-claim" deleted
+```
+
+and the claim will have gone in the AWS console.
+
+And lastly:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc delete sc/standard-aws-ebs
+storageclass.storage.k8s.io "standard-aws-ebs" deleted
+```
+
+## Volume Sharing with Multi-Container Pod
+
+![Multi container pod](images/multi-pod.png)
+
+We create the above with [pod-nginx-multi.yaml](../k8s/pods/pod-nginx-multi.yaml):
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    tier: frontend
+    app:  nginx
+  annotations:
+    description: Multiple containers in pod sharing a volume
+spec:
+  volumes:                                 # Define the volumes available to your containers
+    - name: www-data-share                 # Name of the Volume 
+      emptyDir: {}                         # EmptyDir type for sharing data between containers
+  containers:
+    # First container in the Pod
+    - name: nginx
+      image: nginx:1.13.8
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html # Mount path inside the container
+          name: www-data-share             # Name must match the volume name defined above
+          readOnly: true                   # nginx can only read data from this volume
+      ports:
+        - containerPort: 80
+    # Second Container - Syncs a Git Repo
+    - name: git-sync
+      image: openweb/git-sync:0.0.1
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html  # Mount path within the second container
+          name: www-data-share              # The same volume is mounted by both containers
+      env:
+        - name: GIT_SYNC_REPO               # GIT Repo to Sync 
+          value: "https://github.com/naveenjoy/naveenjoy.github.io.git"
+        - name: GIT_SYNC_DEST               # Destination is the shared volume
+          value: "/usr/share/nginx/html" 
+        - name: GIT_SYNC_BRANCH             # Sync the master branch
+          value: "master"
+        - name: GIT_SYNC_REV
+          value: "FETCH_HEAD"
+        - name: GIT_SYNC_WAIT               # Sync every 10 seconds
+          value: "10"
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-multi.yaml
+```
+
+To view the logs of just one container (such as git-sync):
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get all
+NAME        READY   STATUS    RESTARTS   AGE
+pod/nginx   2/2     Running   0          11s
+
+➜ kc logs -f pod/nginx --container git-sync
+2020/05/17 14:22:18 clone "https://github.com/naveenjoy/naveenjoy.github.io.git": Cloning into '/usr/share/nginx/html'...
+2020/05/17 14:22:19 fetch "master": From https://github.com/naveenjoy/naveenjoy.github.io
+ * branch            master     -> FETCH_HEAD
+2020/05/17 14:22:19 reset "FETCH_HEAD": HEAD is now at 1bf64e0 Delete img.png
+2020/05/17 14:22:19 wait 10 seconds
+2020/05/17 14:22:29 done
+2020/05/17 14:22:29 fetch "master": From https://github.com/naveenjoy/naveenjoy.github.io
+...
+```
+
+And we can see if the web server does indeed pick up files pulled by the git image:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc port-forward pod/nginx 8080:80
+Forwarding from 127.0.0.1:8080 -> 80
+Forwarding from [::1]:8080 -> 80
+^Z
+zsh: suspended  kubectl port-forward pod/nginx 8080:80
+
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods on  master [!+] at ☸️ backwards.k8s.local took 2s
+✦ ➜ bg
+[1]  + continued  kubectl port-forward pod/nginx 8080:80
+
+➜ http localhost:8080
+HTTP/1.1 200 OK
+...
+Hello, Welcome to Kubernetes on AWS Git-Sync Demo
+```
+

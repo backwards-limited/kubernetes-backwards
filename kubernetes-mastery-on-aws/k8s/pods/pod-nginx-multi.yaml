@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    tier: frontend
+    app:  nginx
+  annotations:
+    description: Multiple containers in pod sharing a volume
+spec:
+  volumes:                                      # Define all the volumes available to your containers
+    - name: www-data-share                      # Name of the Volume 
+      emptyDir: {}                              # EmptyDir volume type is used for sharing data between containers
+  containers:
+    # First container in the Pod
+    - name: nginx
+      image: nginx:1.13.8
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html      # Mount path inside the container
+          name: www-data-share                  # Name must match the volume name defined above in the Volumes section
+          readOnly: true                        # The nginx container can only read data from this volume
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+    # Second Container - Syncs a Git Repo
+    - name: git-sync
+      image: openweb/git-sync:0.0.1
+      volumeMounts:
+        - mountPath: /usr/share/nginx/html      # Mount path within the second container (Same as the first)
+          name: www-data-share                  # The same volume is mounted by both containers
+      env:                                      # You can define environment variables for the container using env (name & value)
+        - name: GIT_SYNC_REPO                   # GIT Repo to Sync 
+          value: "https://github.com/naveenjoy/naveenjoy.github.io.git"     # Repo contains a simple html page
+        - name: GIT_SYNC_DEST                   # Destination is the shared volume
+          value: "/usr/share/nginx/html" 
+        - name: GIT_SYNC_BRANCH                 # Sync the master branch
+          value: "master"
+        - name: GIT_SYNC_REV
+          value: "FETCH_HEAD"
+        - name: GIT_SYNC_WAIT                   # Sync every 10 seconds
+          value: "10"
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
