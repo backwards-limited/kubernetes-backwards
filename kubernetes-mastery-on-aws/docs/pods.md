@@ -981,3 +981,31 @@ HTTP/1.1 200 OK
 Hello, Welcome to Kubernetes on AWS Git-Sync Demo
 ```
 
+## Secrets
+
+Some data to store inside a secret:
+
+- TLS Data (key, certificate)
+- Username / Password
+- OAuth tokens
+- Private keys
+
+3 steps to creating and consuming secrets:
+
+1. Assemble the raw data file(s) you want to store inside the secret object e.g. TLS key file, username file, password file, token file. You would e.g. put the TLS key in one file and the certificate in another file. Or one file to contain username and another file to contain password i.e. place one secret data item inside a file.
+2. Create the secret object. Use **kubectl create secret <name of secret>** command with the data files provided as arguments. You can also create secret inside **yaml** (or **json**) file, and then use said file to create the secret - when doing this, the secret data must be base64 encoded. It is preferable to use the **create secret** command.
+3. Consume the secret inside your application either:
+   - Mount the secret as a data volume (**secrets volume**) OR
+   - Expose it as environment variables inside the container.
+
+## ConfigMap
+
+```bash
+➜ kc create configmap <map-name> <data-source>
+```
+
+The **data source** is specified as **key value pairs**.
+
+ConfigMaps are consumed inside a container by mounting as a **configMap volume** OR exposing as **environment variables**.
+
+When a ConfigMap already being consumed by a Pod is updated, the projected keys are eventually updated inside the Pod. Though you must first create a ConfigMap before a Pod can use it.
