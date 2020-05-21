@@ -173,7 +173,7 @@ Let's also send the above command to the background by first hitting **Ctl-Z** a
 zsh: suspended  kubectl port-forward pods/nginx 8080:80
 
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local took 1m 28s
-✦ ➜ bg
+➜ bg
 [1]  + continued  kubectl port-forward pods/nginx 8080:80
 ```
 
@@ -181,7 +181,7 @@ And we can access nginx with **httpie**, **curl** or **web browser**:
 
 ```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
-✦ ➜ http localhost:8080
+➜ http localhost:8080
 Handling connection for 8080
 HTTP/1.1 200 OK
 ...
@@ -1009,3 +1009,398 @@ The **data source** is specified as **key value pairs**.
 ConfigMaps are consumed inside a container by mounting as a **configMap volume** OR exposing as **environment variables**.
 
 When a ConfigMap already being consumed by a Pod is updated, the projected keys are eventually updated inside the Pod. Though you must first create a ConfigMap before a Pod can use it.
+
+## Secret and ConfigMap Example - Setup Nginx to Serve HTTPS
+
+- Enable TLS on nginx Pod to serve HTTPS connections
+- Use a Secret to expose sensitive data (key & certificate) inside the container
+- Use a ConfigMap to expose the nginx config file inside the container
+
+First generate key and certificate:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -subj '/CN=localhost' -out cert.pem
+Generating a 2048 bit RSA private key
+..+++
+.........+++
+writing new private key to 'key.pem'
+-----
+
+➜ ls -las
+...
+ 8 -rw-r--r--   1 davidainslie  staff   977 21 May 20:59 cert.pem
+ 8 -rw-r--r--   1 davidainslie  staff  1704 21 May 20:59 key.pem
+```
+
+View the certificate:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ openssl x509 -text -noout -in cert.pem
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number: 13816641977533366620 (0xbfbe92acc3a0815c)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: CN=localhost
+...        
+```
+
+Now create the Secret:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc create secret generic ssl-secret --from-file=ssl-key=key.pem --from-file=ssl-cert=cert.pem
+secret/ssl-secret created
+```
+
+Let's check the created Secret:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get secrets
+NAME                  TYPE                                  DATA   AGE
+default-token-jwtst   kubernetes.io/service-account-token   3      20m
+ssl-secret            Opaque                                2      56s
+
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods on  master [!] at ☸️ backwards.k8s.local
+➜ kc describe secret/ssl-secret
+Name:         ssl-secret
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+ssl-key:   1704 bytes
+ssl-cert:  977 bytes
+```
+
+Note the number of bytes are the same as viewed on the file system.
+
+And to view the Secret (in base64 encoding):
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc get secret/ssl-secret -o yaml
+apiVersion: v1
+data:
+  ssl-cert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNwRENDQVl3Q0NRQy92cEtzdzZDQlhEQU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRERBbHMKYjJOaGJHaHZjM1F3SGhjTk1qQXdOVEl4TVRrMU9UTTBXaGNOTWpFd05USXhNVGsxT1RNMFdqQVVNUkl3RUFZRApWUVFEREFsc2IyTmhiR2h2YzNRd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUUMxCjZzQTdXejY4Vlg4aDJaTFpnYVQ3YUpITTdDUWtNS05Bc0VVQTVDSFIzd05EQXI3bkxxL0VmVkY0d2NmK1hNUU0KVTVtTk1IVFdmTHN1bHA5NzZHbnpqSmMwMkVaMStwSTZGbEZjaEhaZlFGUHlVK0RPNU9Md3RnRE8wY3VwRmVQZAo3cWpWOVVwbWR5TEsrRG5PVE1ITFI1V1RScWtDSW1YSWozS2pVSjI2VUd6K1VMV0p2WHplM1VXNzJHTGYrSGVlCisydU13MnRQUXBqWWFEaHFZVS90eXZ6alFZTUVXOEM5Tmp0WDYyblZxVVppUFRBTmNEQS9XSmVVOVJ6NU03Q28KbzY1a1B3ZS9nanVZSzU2RUVDRGlPcTJVZGlHREhOOFhtWDZHdjdBd0V4R05wYVJOdE9YYVdMVGJsYlhKM0dtVwpzYmFGRlhGYnE3b2xPODNrRXlqVkFnTUJBQUV3RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUlodHpUM2F3NEZICmFPR3A5SndvT1ppVEsyVWJrSSt1cllKWTkyV29TY3VSaDZTVUkvMmx1Y0I0TUJEL2hhQnppU2lwSnVBZEZsQzIKN2M2OWwvTnFxZkdiNGc1bHJxdkFqbE1FdytLZVVMNG1sc3pkeTNMMFNNKzJuTUovTUMyVnNVSWlyRGU1V3NocwpmbWpBME1uajBMcSs4QXEwNWlXWXJRLytHaUVLNEZmK2NtZmJTY1NBZ0lKREFwVHZFVFA4TndJeGkxb2IwRnFxCkt4cWU5ZndRdnBvQ1dxQWNxc01TRS9ydnhkUDlwTWNhV1hBZDNydENteWxNNVZZN2NJakZjN2ZBZFVQNHdIeUMKNHozc1FjUEhDODA1YUpVcHBia2pQL0lldUNaaWllNUtYKzlwQ05ibk5sYk15Y1FnNTdFQnViTnQreW01V2xhRQpwUlZUWW0waDJQQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  ssl-key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQzE2c0E3V3o2OFZYOGgKMlpMWmdhVDdhSkhNN0NRa01LTkFzRVVBNUNIUjN3TkRBcjduTHEvRWZWRjR3Y2YrWE1RTVU1bU5NSFRXZkxzdQpscDk3NkduempKYzAyRVoxK3BJNkZsRmNoSFpmUUZQeVUrRE81T0x3dGdETzBjdXBGZVBkN3FqVjlVcG1keUxLCitEbk9UTUhMUjVXVFJxa0NJbVhJajNLalVKMjZVR3orVUxXSnZYemUzVVc3MkdMZitIZWUrMnVNdzJ0UFFwalkKYURocVlVL3R5dnpqUVlNRVc4QzlOanRYNjJuVnFVWmlQVEFOY0RBL1dKZVU5Uno1TTdDb282NWtQd2UvZ2p1WQpLNTZFRUNEaU9xMlVkaUdESE44WG1YNkd2N0F3RXhHTnBhUk50T1hhV0xUYmxiWEozR21Xc2JhRkZYRmJxN29sCk84M2tFeWpWQWdNQkFBRUNnZ0VCQUk2Vmc3eENSVWJLWUU0QXdhZjNoSCtGTTVvQmtFWkpWUHV6N1RISW5YVm8Kclo3TlBTSG9KdDRFTjJKRnlHSm5CVWFBRS85azluN1Mzc2VpU1RpT0x0VTA0YU1LelJkVm9WMGo5dnRqMjMvRwo1TVV2MXlseW55bDZEZUlNNytzRWZFaUw4Z3RaS2Nwc0lIb2oydk1HbUhLakZlcU1YSldPcm1abmdMdmV5UEdwCkc0TkRoMFVZbDM3OE5UVkdaNlEzTTYvMGlNd2YyTUc4U2pJSUVQQlhycEVUaFoyUzJHdE9TeHhXaHFZalRjeDYKZTQrUjRxSTZkdW5KbXBubmFmZ2E0RU9jNEk0dC9SOTNPYkZMZFBMYU9EbjNwRGxmY1hKTnpKdFFvUk8yTkkyawpMbkFhdFZUQ3A3Snp4ekJJaUlGb05va1pyYk9pb0c5eEFydGpSUDhCMGlFQ2dZRUEzbHpCNmJndndDR2E0SWk0CldubWlCNG9FMk80M0tDbElDSkJFKyt3dzFPTXU1bEtiQjNSNDkyZnowRTdGUlhzNVdKYzNGbndZdCtmajQ4UzYKeS9sZ2phWndpcllzVEEyRzlBb1plNlhRb3A2bHVuZ0VoSmdHcnNZVGpWQklCeFg2ZWhZcjVEQzZ4eVkwNCtvbgpSOXVvVDgzVkpvZ01Zd3VERW1kMFU0VnptNDBDZ1lFQTBXK3pRU3cwSkR2YzVvQWtEMkpGamFvajkwWFJyN3MwCjhFUmc2NVcwWHZNRUo3NVlEdm00M0hLU0ZwdVl0L2FBZEd4MXhRWGZBSmRJKzZsWU5GMTRWMCtBZmNHQnp6TUkKck02ZW0xZjVvcnZ1RVdtR0tDZkpsc3NybGNKbEJTQ21xR3VEalNIVGgwMU5qb3lockY5QzI1Mm14TmJuTWkwQgptTVh0ZU4rRXpHa0NnWUJJbHBzdXd0UERzclN1YTdOU3hiWWhJK3NsTGM2UHE3bzZJVzZEbHJ6eUloK2pUSUFUClZQQlFRMzBTR1VUSXc4c2FvbkozUXBlSElZb0JScTE3L0xLS1N6VWQ4dzVPM1hPYW90bGl4ZVJ2MGI1a090MnUKc3pvclA3b09QWkRsejBUdktlRzJJam8yM01BVFR0TDM0RHIzb2tmY3hqalU5R01iVk81aWZZUVoyUUtCZ0RGYwpXQzBtRSt2dVIvUHpnNHcwcHh2cVc2dXR3dXZkL1c0YlQ1UjJwaG95d0duMWpKK0s3NnpWTytVa0t1eEFwcW5KCjNqL2ZVRjI5U2pBMkMxbmNKYjYrT0JScmhRS21qb2JiODdtOUZGTHNaQUdxa3pubmxyVjVrUDRzNE01Q2tjVGsKQWc5RFI2MTk1S2VTTVpDRXF5ZERrc2lWdGN1M204YTc3Mm9ybEFyeEFvR0JBTVFIUnNPZWcxZ01LS2QzVERiSgphbExBWWllUk91cG1aa1NNR0RZQ3lGK1QyRE82VDQ0SVZOTVZ2UnZSSE1OQ0JWUUI0dzFTS2J5Q01HZ1hSWjZCCjZ2UFNYUkloQVVqcWVQd0h0U25pSEtNT3FLMm82Y2xDMHF0QWg3UXlGMHpoYUwrTlVEVlRCRlhNdnBNbll4Z0oKUTUyYXJiQ2ZraFg4YUdMUFZGQUFRZVZaCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
+kind: Secret
+metadata:
+  creationTimestamp: "2020-05-21T20:05:03Z"
+  name: ssl-secret
+  namespace: default
+  resourceVersion: "2637"
+  selfLink: /api/v1/namespaces/default/secrets/ssl-secret
+  uid: 232f019f-5ce2-4b49-8b97-17b21474427c
+type: Opaque
+```
+
+Now we want to mount the Secret into the [nginx Pod](../k8s/pods/pod-nginx-secret.yaml) as a Volume:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    tier: frontend
+    app:  nginx
+  annotations:
+    description: Nginx pod with a secret containing TLS data
+spec:
+  volumes:            
+    - name: ssl-files          # Define the secret volume
+      secret:                  # Create a secret-volume to store sensitive data
+        secretName: ssl-secret # Name matching secret object created by kubectl secret command
+                      
+  containers:
+    - name: nginx
+      image: nginx:1.13.8
+      volumeMounts:            # Mount the secret volume
+        - name: ssl-files      # Name matching secret volume name defined above in spec.volumes
+          mountPath: /ssl      # mountPath within container where the secret data will appear
+          readOnly: true
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-secret.yaml
+pod/nginx created
+
+➜ kc get pods
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          37s
+```
+
+Let's get a shell in the container to **cat** the secret files:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc exec -it pod/nginx -- /bin/bash
+
+root@nginx:/# ls -las /ssl
+total 4
+0 drwxrwxrwt 3 root root  120 May 21 20:21 .
+4 drwxr-xr-x 1 root root 4096 May 21 20:21 ..
+0 drwxr-xr-x 2 root root   80 May 21 20:21 ..2020_05_21_20_21_21.046499874
+0 lrwxrwxrwx 1 root root   31 May 21 20:21 ..data -> ..2020_05_21_20_21_21.046499874
+0 lrwxrwxrwx 1 root root   15 May 21 20:21 ssl-cert -> ..data/ssl-cert
+0 lrwxrwxrwx 1 root root   14 May 21 20:21 ssl-key -> ..data/ssl-key
+
+root@nginx:/# cat /ssl/ssl-key
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC16sA7Wz68VX8h
+2ZLZgaT7aJHM7CQkMKNAsEUA5CHR3wNDAr7nLq/EfVF4wcf+XMQMU5mNMHTWfLsu
+lp976GnzjJc02EZ1+pI6FlFchHZfQFPyU+DO5OLwtgDO0cupFePd7qjV9UpmdyLK
++DnOTMHLR5WTRqkCImXIj3KjUJ26UGz+ULWJvXze3UW72GLf+Hee+2uMw2tPQpjY
+aDhqYU/tyvzjQYMEW8C9NjtX62nVqUZiPTANcDA/WJeU9Rz5M7Coo65kPwe/gjuY
+K56EECDiOq2UdiGDHN8XmX6Gv7AwExGNpaRNtOXaWLTblbXJ3GmWsbaFFXFbq7ol
+O83kEyjVAgMBAAECggEBAI6Vg7xCRUbKYE4Awaf3hH+FM5oBkEZJVPuz7THInXVo
+rZ7NPSHoJt4EN2JFyGJnBUaAE/9k9n7S3seiSTiOLtU04aMKzRdVoV0j9vtj23/G
+5MUv1ylynyl6DeIM7+sEfEiL8gtZKcpsIHoj2vMGmHKjFeqMXJWOrmZngLveyPGp
+G4NDh0UYl378NTVGZ6Q3M6/0iMwf2MG8SjIIEPBXrpEThZ2S2GtOSxxWhqYjTcx6
+e4+R4qI6dunJmpnnafga4EOc4I4t/R93ObFLdPLaODn3pDlfcXJNzJtQoRO2NI2k
+LnAatVTCp7JzxzBIiIFoNokZrbOioG9xArtjRP8B0iECgYEA3lzB6bgvwCGa4Ii4
+WnmiB4oE2O43KClICJBE++ww1OMu5lKbB3R492fz0E7FRXs5WJc3FnwYt+fj48S6
+y/lgjaZwirYsTA2G9AoZe6XQop6lungEhJgGrsYTjVBIBxX6ehYr5DC6xyY04+on
+R9uoT83VJogMYwuDEmd0U4Vzm40CgYEA0W+zQSw0JDvc5oAkD2JFjaoj90XRr7s0
+8ERg65W0XvMEJ75YDvm43HKSFpuYt/aAdGx1xQXfAJdI+6lYNF14V0+AfcGBzzMI
+rM6em1f5orvuEWmGKCfJlssrlcJlBSCmqGuDjSHTh01NjoyhrF9C252mxNbnMi0B
+mMXteN+EzGkCgYBIlpsuwtPDsrSua7NSxbYhI+slLc6Pq7o6IW6DlrzyIh+jTIAT
+VPBQQ30SGUTIw8saonJ3QpeHIYoBRq17/LKKSzUd8w5O3XOaotlixeRv0b5kOt2u
+szorP7oOPZDlz0TvKeG2Ijo23MATTtL34Dr3okfcxjjU9GMbVO5ifYQZ2QKBgDFc
+WC0mE+vuR/Pzg4w0pxvqW6utwuvd/W4bT5R2phoywGn1jJ+K76zVO+UkKuxApqnJ
+3j/fUF29SjA2C1ncJb6+OBRrhQKmjobb87m9FFLsZAGqkznnlrV5kP4s4M5CkcTk
+Ag9DR6195KeSMZCEqydDksiVtcu3m8a772orlArxAoGBAMQHRsOeg1gMKKd3TDbJ
+alLAYieROupmZkSMGDYCyF+T2DO6T44IVNMVvRvRHMNCBVQB4w1SKbyCMGgXRZ6B
+6vPSXRIhAUjqePwHtSniHKMOqK2o6clC0qtAh7QyF0zhaL+NUDVTBFXMvpMnYxgJ
+Q52arbCfkhX8aGLPVFAAQeVZ
+-----END PRIVATE KEY-----
+
+root@nginx:/# cat /ssl/ssl-cert
+-----BEGIN CERTIFICATE-----
+MIICpDCCAYwCCQC/vpKsw6CBXDANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls
+b2NhbGhvc3QwHhcNMjAwNTIxMTk1OTM0WhcNMjEwNTIxMTk1OTM0WjAUMRIwEAYD
+VQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1
+6sA7Wz68VX8h2ZLZgaT7aJHM7CQkMKNAsEUA5CHR3wNDAr7nLq/EfVF4wcf+XMQM
+U5mNMHTWfLsulp976GnzjJc02EZ1+pI6FlFchHZfQFPyU+DO5OLwtgDO0cupFePd
+7qjV9UpmdyLK+DnOTMHLR5WTRqkCImXIj3KjUJ26UGz+ULWJvXze3UW72GLf+Hee
++2uMw2tPQpjYaDhqYU/tyvzjQYMEW8C9NjtX62nVqUZiPTANcDA/WJeU9Rz5M7Co
+o65kPwe/gjuYK56EECDiOq2UdiGDHN8XmX6Gv7AwExGNpaRNtOXaWLTblbXJ3GmW
+sbaFFXFbq7olO83kEyjVAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAIhtzT3aw4FH
+aOGp9JwoOZiTK2UbkI+urYJY92WoScuRh6SUI/2lucB4MBD/haBziSipJuAdFlC2
+7c69l/NqqfGb4g5lrqvAjlMEw+KeUL4mlszdy3L0SM+2nMJ/MC2VsUIirDe5Wshs
+fmjA0Mnj0Lq+8Aq05iWYrQ/+GiEK4Ff+cmfbScSAgIJDApTvETP8NwIxi1ob0Fqq
+Kxqe9fwQvpoCWqAcqsMSE/rvxdP9pMcaWXAd3rtCmylM5VY7cIjFc7fAdUP4wHyC
+4z3sQcPHC805aJUppbkjP/IeuCZiie5KX+9pCNbnNlbMycQg57EBubNt+ym5WlaE
+pRVTYm0h2PA=
+-----END CERTIFICATE-----
+```
+
+Now we want to configure nginx to serve HTTPS:
+
+```bash
+root@nginx:/# ls /etc/nginx/conf.d
+default.conf
+```
+
+We will copy the file **default.conf**; edit it's configuration so nginx can serve HTTPS; and package in a ConfgiMap Volume, and mount it inside the container at **/etc/nginx/conf.d**, thus replacing the default:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc cp nginx:etc/nginx/conf.d/default.conf default.conf
+```
+
+and edit the file:
+
+```yaml
+server {
+    listen       80;
+    listen       443 ssl; # ADDED
+    server_name  localhost;
+    ssl_certificate     /ssl/ssl-cert; # ADDED
+    ssl_certificate_key /ssl/ssl-key; # ADDED
+...    
+```
+
+Create the ConfigMap:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc create configmap nginx-conf --from-file=default.conf
+configmap/nginx-conf created
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc describe configmap/nginx-conf
+Name:         nginx-conf
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+default.conf:
+----
+server {
+    listen       80;
+    listen       443 ssl; # ADDED
+    server_name  localhost;
+    ssl_certificate     /ssl/ssl-cert; # ADDED
+    ssl_certificate_key /ssl/ssl-key; # ADDED
+
+```
+
+Essentially our edited default.conf.
+
+Now expose this [ConfigMap Volume](../k8s/pods/pod-nginx-secret-configmap.yaml), mounting it into the container:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    tier: frontend
+    app:  nginx
+  annotations:
+    description: Nginx pod serving both HTTP and HTTPS (uses a secret and configmap)
+spec:
+  volumes:            
+    - name: ssl-files              
+      secret:                      
+        secretName: ssl-secret     
+    
+    - name: nginx-conf-file # Define the configmap volume
+      configMap:                   
+        name: nginx-conf    # Name matching name of ConfigMap containing the nginx config file
+                      
+  containers:
+    - name: nginx
+      image: nginx:1.13.8
+      volumeMounts:                 
+        - name: ssl-files           
+          mountPath: /ssl
+          readOnly: true
+        - name: nginx-conf-file          # Mount the config map volume,  
+          mountPath: /etc/nginx/conf.d   # at the path where nginx looks for its config file
+      ports:
+        - containerPort: 80
+        - containerPort: 443
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+```
+
+First delete the original version of the Pod before applying this enhancement:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc delete pod/nginx
+pod "nginx" deleted
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-secret-configmap.yaml
+pod/nginx created
+```
+
+Double check viewing the updated **default.conf** in the Pod:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods on  master [!?] at ☸️ backwards.k8s.local took 5s
+➜ kc exec pod/nginx -- cat /etc/nginx/conf.d/default.conf
+server {
+    listen       80;
+    listen       443 ssl; # ADDED
+    server_name  localhost;
+    ssl_certificate     /ssl/ssl-cert; # ADDED
+    ssl_certificate_key /ssl/ssl-key; # ADDED
+...    
+```
+
+Let's test HTTPS:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ kc port-forward pod/nginx 8443:443
+Forwarding from 127.0.0.1:8443 -> 443
+Forwarding from [::1]:8443 -> 443
+^Z
+zsh: suspended  kubectl port-forward pod/nginx 8443:443
+
+
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ bg
+[1]  + continued  kubectl port-forward pod/nginx 8443:443
+
+
+➜ curl https://localhost:8443 --insecure
+Handling connection for 8443
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+```
+
+Or with [httpie](https://httpie.org/):
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ http --verify=no https://localhost:8443
+Handling connection for 8443
+HTTP/1.1 200 OK
+...
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+```
+
+Sidenote - If you wish to base64 a file just do e.g.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ base64 cert.pem
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNwRENDQVl3Q0NRQy92cEtzdzZDQlhE
+QU5CZ2txaGtpRzl3MEJBUXNGQURBVU1SSXdFQVlEVlFRRERBbHMKYjJOaGJHaHZjM1F3SGhj
+Tk1qQXdOVEl4TVRrMU9UTTBXaGNOTWpFd05USXhNVGsxT1RNMFdqQVVNUkl3RUFZRApWUVFE
+REFsc2IyTmhiR2h2YzNRd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0Fv
+SUJBUUMxCjZzQTdXejY4Vlg4aDJaTFpnYVQ3YUpITTdDUWtNS05Bc0VVQTVDSFIzd05EQXI3
+bkxxL0VmVkY0d2NmK1hNUU0KVTVtTk1IVFdmTHN1bHA5NzZHbnpqSmMwMkVaMStwSTZGbEZj
+aEhaZlFGUHlVK0RPNU9Md3RnRE8wY3VwRmVQZAo3cWpWOVVwbWR5TEsrRG5PVE1ITFI1V1RS
+cWtDSW1YSWozS2pVSjI2VUd6K1VMV0p2WHplM1VXNzJHTGYrSGVlCisydU13MnRQUXBqWWFE
+aHFZVS90eXZ6alFZTUVXOEM5Tmp0WDYyblZxVVppUFRBTmNEQS9XSmVVOVJ6NU03Q28KbzY1
+a1B3ZS9nanVZSzU2RUVDRGlPcTJVZGlHREhOOFhtWDZHdjdBd0V4R05wYVJOdE9YYVdMVGJs
+YlhKM0dtVwpzYmFGRlhGYnE3b2xPODNrRXlqVkFnTUJBQUV3RFFZSktvWklodmNOQVFFTEJR
+QURnZ0VCQUlodHpUM2F3NEZICmFPR3A5SndvT1ppVEsyVWJrSSt1cllKWTkyV29TY3VSaDZT
+VUkvMmx1Y0I0TUJEL2hhQnppU2lwSnVBZEZsQzIKN2M2OWwvTnFxZkdiNGc1bHJxdkFqbE1F
+dytLZVVMNG1sc3pkeTNMMFNNKzJuTUovTUMyVnNVSWlyRGU1V3NocwpmbWpBME1uajBMcSs4
+QXEwNWlXWXJRLytHaUVLNEZmK2NtZmJTY1NBZ0lKREFwVHZFVFA4TndJeGkxb2IwRnFxCkt4
+cWU5ZndRdnBvQ1dxQWNxc01TRS9ydnhkUDlwTWNhV1hBZDNydENteWxNNVZZN2NJakZjN2ZB
+ZFVQNHdIeUMKNHozc1FjUEhDODA1YUpVcHBia2pQL0lldUNaaWllNUtYKzlwQ05ibk5sYk15
+Y1FnNTdFQnViTnQreW01V2xhRQpwUlZUWW0waDJQQT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUt
+LS0tLQo=
+```
+

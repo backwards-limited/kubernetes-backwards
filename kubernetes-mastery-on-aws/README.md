@@ -21,3 +21,5 @@
   - [Monitoring](docs/monitoring.md)
 
   - [Pods](docs/pods.md)
+
+  - [ReplicaSets](docs/replicasets.md)
