@@ -99,3 +99,7 @@ INFO  shutting down Metals
 May 16, 2020 11:32:48 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTraceNotification
 2020.05.16 23:09:41 INFO  shutting down Metals
+2020.05.22 23:10:21 INFO  started: Metals version 0.9.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+2020.05.22 23:10:22 INFO  time: initialize in 0.3s
+2020.05.22 23:10:22 WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+2020.05.22 23:10:22 INFO  no build target: using presentation compiler with only scala-library
