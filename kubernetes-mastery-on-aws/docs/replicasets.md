@@ -16,6 +16,8 @@ A ReplicaSet uses a **label selector** to identify the Pods it manages - **spec.
 
 Regarding your application - Every Pod instance created by a ReplicaSet should be identical. ReplicaSets are designed to scale **stateless** (or **nearly stateless**) applications - good examples being **nginx** or **Apache Web Server**.
 
+## Create ReplicaSet
+
 Take a look at [pod-nginx-multi-rs.yaml](../k8s/replicasets/pod-nginx-multi-rs.yaml):
 
 ```yaml
@@ -70,5 +72,128 @@ spec:                  # Just like the Pod, the ReplicaSet has a spec section
               value: "FETCH_HEAD"
             - name: GIT_SYNC_WAIT    
               value: "10"
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-multi-rs.yaml
+replicaset.apps/nginx created
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-2jglv   2/2     Running   0          46s
+nginx-sx548   2/2     Running   0          46s
+nginx-zxr7k   2/2     Running   0          46s
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get rs
+NAME    DESIRED   CURRENT   READY   AGE
+nginx   3         3         3       3m50s
+```
+
+Simulate a pod issue; bring one down; another should be started automatically:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc delete pod/nginx-2jglv
+pod "nginx-2jglv" deleted
+
+➜ kc get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-sx548   2/2     Running   0          8m22s
+nginx-xjp9b   2/2     Running   0          17s
+nginx-zxr7k   2/2     Running   0          8m22s
+```
+
+ReplicaSets are matched to Pods by labels. So it is possible to have zero to many ReplicaSets matching a Pod. To which which ReplicaSet matches a Pod(s):
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get pod/nginx-sx548 -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  ...
+  generateName: nginx-
+  labels:
+    app: nginx
+    tier: frontend
+  name: nginx-sx548
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: nginx
+    uid: ec8ed926-804e-4a39-93a3-80362f91b68e
+...    
+```
+
+Filter the Pods managed by a ReplicaSet:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get pods -l app=nginx,tier=frontend
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-sx548   2/2     Running   0          14m
+nginx-xjp9b   2/2     Running   0          6m26s
+nginx-zxr7k   2/2     Running   0          14m
+```
+
+Deleting the ReplicaSet will delete its managed Pods:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc delete rs/nginx
+replicaset.apps "nginx" deleted
+
+➜ kc get pods
+NAME          READY   STATUS        RESTARTS   AGE
+nginx-xjp9b   0/2     Terminating   0          8m23s
+nginx-zxr7k   0/2     Terminating   0          16m
+```
+
+If for some reason you would like to delete the ReplicaSet without touching the Pods (say you accidentally have more that one ReplicaSet managing your Pods):
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc delete rs/nginx --cascade=false
+```
+
+## Scaling
+
+The **desired state** is the **configured number of replicas** in the RS yaml file, using the **spec.replicas** field.
+
+The **current state** is **how many Pod replicas are currently running** that **matches the label selector**.
+
+There are **2 ways to scale** - imperatively or declaratively.
+
+- To scale imperatively, use the **kubectl scale** command:
+  - e.g. **kc scale rs/nginx --replicas=5**
+- To scale declaratively, edit the ReplicaSet yaml file and change the **spec.replicas** field then **kc apply** it.
+  - e.g. **kc apply -f replicaset-file.yaml**
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc scale rs/nginx --replicas=5
+replicaset.apps/nginx scaled
+
+➜ kc get rs
+NAME    DESIRED   CURRENT   READY   AGE
+nginx   5         5         5       80s
+
+➜ kc get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-5cq62   2/2     Running   0          15s
+nginx-7gdfm   2/2     Running   0          87s
+nginx-8xmct   2/2     Running   0          15s
+nginx-9w4ld   2/2     Running   0          87s
+nginx-b95wh   2/2     Running   0          87s
 ```
 
