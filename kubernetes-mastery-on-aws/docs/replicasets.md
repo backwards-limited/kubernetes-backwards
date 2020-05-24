@@ -197,3 +197,17 @@ nginx-9w4ld   2/2     Running   0          87s
 nginx-b95wh   2/2     Running   0          87s
 ```
 
+## HPA - Horizontal Pod Autoscaler
+
+Horizontal Pod Autoscaler can auto-scale a ReplicaSet, based on **observed CPU/memory utilisation**. HPA periodically (default of 30 seconds) fetches metrics for each of the Pods in the ReplicaSet using a control loop. Note that you will need **metrics-server** running in the cluster. To check for the metrics-server:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get pods -n kube-system
+```
+
+If not there, take a look at the first part of [monitoring](monitoring.md).
+
+HPA computes an **arithmetic mean** of the Pods's CPU or memory and will preserve the condition:
+
+**MinReplicas <= Replicas <= MaxReplicas**

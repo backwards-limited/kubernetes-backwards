@@ -1,6 +1,6 @@
 # Monitoring
 
-We want to set up [metrics server](https://github.com/kubernetes-sigs/metrics-server). As we are using **kops** we follow the [kops metrics server](https://github.com/kubernetes/kops/blob/master/addons/metrics-server/README.md) README and a nice [article](https://medium.com/@sanjay.chauhan164/https-medium-com-sanjay-chauhan164-kubernetes-with-kops-on-aws-20debcf3e1db) on Medium:
+We want to set up [metrics server](https://github.com/kubernetes-sigs/metrics-server). As we are using **kops** we follow [kops metrics server](https://github.com/kubernetes/kops/tree/master/addons/metrics-server):
 
 ```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
@@ -29,7 +29,19 @@ Finally:
 
 ```bash
 kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
-➜ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.8.x.yaml
+➜ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.16.x.yaml
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc top nodes
+error: metrics not available yet
+
+➜ kc top nodes
+NAME                                          CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+ip-172-20-48-43.eu-west-2.compute.internal    123m         12%    772Mi           86%
+ip-172-20-53-244.eu-west-2.compute.internal   24m          2%     423Mi           47%
+ip-172-20-55-232.eu-west-2.compute.internal   30m          3%     539Mi           60%
 ```
 
 ## Prometheus
