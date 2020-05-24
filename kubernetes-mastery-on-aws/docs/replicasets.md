@@ -211,3 +211,193 @@ If not there, take a look at the first part of [monitoring](monitoring.md).
 HPA computes an **arithmetic mean** of the Pods's CPU or memory and will preserve the condition:
 
 **MinReplicas <= Replicas <= MaxReplicas**
+
+Demo:
+
+- Create nginx ReplicaSet of 2 containers requesting 2m CPU each
+- Create HPA that targets this ReplicaSet
+  - To maintain between 1 and 10 replicas
+  - And target CPU utilisation of 50%
+
+Take a look at [pod-nginx-multi-rs-hpa.yaml](../k8s/replicasets/pod-nginx-multi-rs-hpa.yaml):
+
+```yaml
+apiVersion: apps/v1      
+kind: ReplicaSet
+metadata:
+  name: nginx           
+  labels:
+    tier: frontend      
+    app:  nginx          
+  annotations:
+    description: A Replicaset targeted by a Horizontal Pod Autoscaler (HPA)
+spec:                    
+  # Do not specify a replica count because it is managed by the autoscaler
+  selector:              
+    matchLabels:         
+      tier: frontend
+      app: nginx
+            
+  template:              
+    metadata:            
+      labels:
+        tier: frontend   
+        app:  nginx 
+        
+    spec:                
+      volumes:          
+        - name: www-data-share     
+          emptyDir: {}
+          
+      containers:
+        - name: nginx                
+          image: nginx:1.13.8
+          resources:   
+            requests:  
+              cpu: "2m" # HPA requires a resource request such as the CPU or Memory
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html      
+              name: www-data-share                  
+              readOnly: true                        
+          ports:
+            - containerPort: 80
+        
+        - name: git-sync
+          image: openweb/git-sync:0.0.1
+          resources:   
+            requests:  
+              cpu: "2m" 
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html    
+              name: www-data-share                
+          env:                       
+            - name: GIT_SYNC_REPO    
+              value: "https://github.com/naveenjoy/naveenjoy.github.io.git"     
+            - name: GIT_SYNC_DEST    
+              value: "/usr/share/nginx/html" 
+            - name: GIT_SYNC_BRANCH  
+              value: "hpa" # Branch where pulling files will create load requiring scaling
+            - name: GIT_SYNC_REV
+              value: "FETCH_HEAD"
+            - name: GIT_SYNC_WAIT    
+              value: "10"
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-multi-rs-hpa.yaml
+replicaset.apps/nginx created
+```
+
+As we did not set the number of replicas, currently there is a default of 1:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get rs
+NAME    DESIRED   CURRENT   READY   AGE
+nginx   1         1         1       81s
+
+➜ kc get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-x2854   2/2     Running   0          85s
+```
+
+HPA will essentially use the following:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc top pod nginx-x2854
+NAME          CPU(cores)   MEMORY(bytes)
+nginx-x2854   5m           29Mi
+
+➜ kc top pod nginx-x2854 --containers
+POD           NAME       CPU(cores)   MEMORY(bytes)
+nginx-x2854   git-sync   5m           27Mi
+nginx-x2854   nginx      0m           2Mi
+```
+
+Let's create an HPA from the command line:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc autoscale rs/nginx --cpu-percent=50 --min=1 --max=10
+horizontalpodautoscaler.autoscaling/nginx autoscaled
+```
+
+And we see that the HPA scales up our replicas to accommodate the extra load shown by the fact that CPU of 150% exceeds our request of 50%:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get hpa
+NAME    REFERENCE          TARGETS    MINPODS   MAXPODS   REPLICAS   AGE
+nginx   ReplicaSet/nginx   150%/50%   1         10        3          101s
+```
+
+We will eventually reach the maximum number of replicas requested:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get hpa --watch
+NAME    REFERENCE          TARGETS    MINPODS   MAXPODS   REPLICAS   AGE
+nginx   ReplicaSet/nginx   122%/50%   1         10        10         3m43s
+```
+
+And for more detail:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local took 1m 39s
+➜ kc describe hpa/nginx
+Name:                                                  nginx
+Namespace:                                             default
+Labels:                                                <none>
+Annotations:                                           <none>
+CreationTimestamp:                                     Sun, 24 May 2020 21:00:54 +0100
+Reference:                                             ReplicaSet/nginx
+Metrics:                                               ( current / target )
+  resource cpu on pods  (as a percentage of request):  150% (6m) / 50%
+Min replicas:                                          1
+Max replicas:                                          10
+ReplicaSet pods:                                       10 current / 10 desired
+Conditions:
+  Type            Status  Reason            Message
+  ----            ------  ------            -------
+  AbleToScale     True    ReadyForNewScale  recommended size matches current size
+  ScalingActive   True    ValidMetricFound  the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)
+  ScalingLimited  True    TooManyReplicas   the desired replica count is more than the maximum replica count
+Events:
+  Type    Reason             Age    From                       Message
+  ----    ------             ----   ----                       -------
+  Normal  SuccessfulRescale  5m18s  horizontal-pod-autoscaler  New size: 2; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  5m3s   horizontal-pod-autoscaler  New size: 3; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  4m3s   horizontal-pod-autoscaler  New size: 6; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  3m48s  horizontal-pod-autoscaler  New size: 9; reason: cpu resource utilization (percentage of request) above target
+  Normal  SuccessfulRescale  3m2s   horizontal-pod-autoscaler  New size: 10; reason: cpu resource utilization (percentage of request) above target
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-6cp9l   2/2     Running   0          6m47s
+nginx-75jl9   2/2     Running   0          7m2s
+nginx-8v8qf   2/2     Running   0          8m2s
+nginx-bkmsx   2/2     Running   0          6m47s
+nginx-brpd6   2/2     Running   0          8m17s
+nginx-ptdkk   2/2     Running   0          6m47s
+nginx-rqqql   2/2     Running   0          7m2s
+nginx-tm2nr   2/2     Running   0          7m2s
+nginx-x2854   2/2     Running   0          19m
+nginx-xt5xw   2/2     Running   0          6m1s
+```
+
+Cleanup:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/replicasets at ☸️ backwards.k8s.local
+➜ kc delete hpa/nginx
+horizontalpodautoscaler.autoscaling "nginx" deleted
+
+➜ kc delete rs/nginx
+replicaset.apps "nginx" deleted
+```
+
