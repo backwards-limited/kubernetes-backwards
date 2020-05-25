@@ -23,3 +23,5 @@
   - [Pods](docs/pods.md)
 
   - [ReplicaSets](docs/replicasets.md)
+
+  - [Deployments](docs/deployments.md)
