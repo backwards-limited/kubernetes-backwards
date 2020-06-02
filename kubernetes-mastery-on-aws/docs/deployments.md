@@ -261,3 +261,133 @@ kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwar
 deployment.apps "nginx" deleted
 ```
 
+## Auto Scale
+
+![Deployment with HPA](images/deployment-with-hpa.png)
+
+The deployment to be used is [pod-nginx-multi-deploy-hpa.yaml](../k8s/deployments/pod-nginx-multi-deploy-hpa.yaml) where you will note there is **no replica count** as the count will be managed by the HPA according to **resources**.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc create secret generic ssl-secret \
+      --from-file=ssl-key=key.pem \
+      --from-file=ssl-cert=cert.pem
+secret/ssl-secret created
+
+➜ kc get secrets
+NAME                  TYPE                                  DATA   AGE
+ssl-secret            Opaque                                2      40s
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc create configmap nginx-conf \
+      --from-file=default.conf
+configmap/nginx-conf created
+
+➜ kc describe configmap nginx-conf
+Name:         nginx-conf
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+default.conf:
+----
+server {
+    listen       80;
+    listen       443 ssl; # ADDED
+    server_name  localhost;
+    ssl_certificate     /ssl/ssl-cert; # ADDED
+    ssl_certificate_key /ssl/ssl-key; # ADDED
+...    
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-multi-deploy-hpa.yaml
+deployment.apps/nginx created
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc get all
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/nginx-74595bd876-c468d   2/2     Running   0          67s
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   100.64.0.1   <none>        443/TCP   4m23s
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx   1/1     1            1           67s
+
+NAME                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/nginx-74595bd876   1         1         1       67s
+```
+
+and to test with **curl**, we again **port forward; ctl-z; bg**:
+
+```bash
+➜ kc port-forward deploy/nginx 8443:443
+Forwarding from 127.0.0.1:8443 -> 443
+Forwarding from [::1]:8443 -> 443
+^Z
+zsh: suspended  kubectl port-forward deploy/nginx 8443:443
+
+✦ ➜ bg
+[1]  + continued  kubectl port-forward deploy/nginx 8443:443
+
+✦ ➜ curl https://localhost:8443 --insecure
+Handling connection for 8443
+Hello, Welcome to Kubernetes on AWS Git-Sync Demo
+```
+
+plus, add [monitoring](monitoring.md) so that we can **top**.
+
+Now we can add the **hpa**.
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc autoscale deploy/nginx --cpu-percent=50 --min=1 --max=10
+horizontalpodautoscaler.autoscaling/nginx autoscaled
+
+➜ kc get hpa
+NAME    REFERENCE          TARGETS    MINPODS   MAXPODS   REPLICAS   AGE
+nginx   Deployment/nginx   200%/50%   1         10        1          16s
+```
+
+Now change **cpu resource** to **4m** for both containers in our manifest and apply:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc apply -f pod-nginx-multi-deploy-hpa.yaml
+deployment.apps/nginx configured
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ kc get rs
+NAME               DESIRED   CURRENT   READY   AGE
+nginx-74595bd876   8         8         2       6m23s
+nginx-fb4c96c68    5         5         0       49s
+
+➜ kc rollout status deploy/nginx
+Waiting for deployment "nginx" rollout to finish: 5 out of 10 new replicas have been updated...
+```
+
+Let's use **Apache benchmark** (which you can homebrew) for **load testing**:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/deployments at ☸️ backwards.k8s.local
+➜ ab -V
+This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+```
+
+Start a new port-forward session and load them up:
+
+```bash
+kubernetes-backwards at ☸️ backwards.k8s.local
+✦ ➜ ab -n 10000 -c 100 https://localhost:8443
+```
+
