@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: nginx                   # A unique name for the Deployment in the current namespace
+  labels:
+    app: nginx                  # values as the Pod's label (i.e. the .spec.template.metadata.labels)
+spec:                           # A Deployment also has a spec section
+  replicas: 4                   # The desired number of Pods
+  
+  selector:                     # The spec.selector is used by this Deployment to identify the Pods its managing
+    matchLabels:                # The spec.selector.matchLabels must match one of the labels in spec.template.metadata.labels
+      app: nginx
+            
+  template:                     # This is the Pod template. The schema is exactly the same as the Pod without apiVersion or kind keys
+    metadata:                   # Do not set a Pod name as it will be auto-assigned to each pod replica.
+      labels:
+        app: nginx              # Make sure to not overlap these labels with any other Pods or controllers
+    spec:                       # Notice that the pod spec is now nested inside the template
+      containers:
+        - name: nginx                
+          image: nginx:1.13.8
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

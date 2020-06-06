@@ -25,3 +25,5 @@
   - [ReplicaSets](docs/replicasets.md)
 
   - [Deployments](docs/deployments.md)
+
+  - [Services](docs/services.md)
