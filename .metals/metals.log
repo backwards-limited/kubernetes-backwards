@@ -113,3 +113,10 @@ INFO: Unsupported notification method: $/setTraceNotification
 2020.06.05 12:29:02 INFO  no build target: using presentation compiler with only scala-library
 2020.06.05 12:29:03 WARN  no build target for: /Users/davidainslie/Desktop/wip.scala
 2020.06.05 22:11:42 INFO  shutting down Metals
+2020.06.06 22:05:56 INFO  started: Metals version 0.9.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+2020.06.06 22:05:56 INFO  time: initialize in 0.28s
+2020.06.06 22:05:57 WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+2020.06.06 22:05:57 INFO  no build target: using presentation compiler with only scala-library
+Jun 06, 2020 10:05:58 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 3
+2020.06.07 00:25:42 INFO  shutting down Metals
