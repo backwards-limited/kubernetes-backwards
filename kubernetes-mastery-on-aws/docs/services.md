@@ -430,3 +430,126 @@ ip-172-20-50-94.eu-west-2.compute.internal   node     172.20.50.94   18.130.225.
 ip-172-20-63-16.eu-west-2.compute.internal   node     172.20.63.16   18.130.162.185   Debian GNU/Linux 9
 ```
 
+## Publish Service Securely using AWS ELB
+
+![Service with ELB](images/service-with-elb.png)
+
+The ELB will inject the **X-Forwarded-For** HTTP header with the user's IP address.
+
+First upload the certificate and key to the IAM AWS service:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ ls -las
+total 120
+ ...
+ 8 -rw-r--r--   1 davidainslie  staff   977 21 May 20:59 cert.pem
+ 8 -rw-r--r--   1 davidainslie  staff  1704 21 May 20:59 key.pem
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/pods at ☸️ backwards.k8s.local
+➜ aws iam upload-server-certificate --server-certificate-name my-nginx-cert --certificate-body file://cert.pem --private-key file://key.pem
+{
+    "ServerCertificateMetadata": {
+        "Path": "/",
+        "ServerCertificateName": "my-nginx-cert",
+        "ServerCertificateId": "ASCA464H6KM4WEA6F2J2A",
+        "Arn": "arn:aws:iam::890953945913:server-certificate/my-nginx-cert",
+        "UploadDate": "2020-06-09T22:23:41+00:00",
+        "Expiration": "2021-05-21T19:59:34+00:00"
+    }
+}
+```
+
+We will add the above ARN to our k8s manifest [nginx-service-elb.yaml](../k8s/services/nginx-service-elb.yaml)
+
+Apply the manifest, and k8s will ask AWS to provision the ELB and load balancer:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local
+➜ kc apply -f nginx-service-elb.yaml
+service/nginx created
+deployment.apps/nginx created
+
+➜ kc get service/nginx
+NAME    TYPE           CLUSTER-IP       EXTERNAL-IP                                       PORT(S)
+nginx   LoadBalancer   100.66.231.105   a6c8448e975e64b03b54d35103b6d9e5-168820584.eu-west-2.elb.amazonaws.com                                                                       443:30885/TCP
+```
+
+And details showing the event of ELB provisioning:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local
+➜ kc describe service/nginx
+Name:                     nginx
+Namespace:                default
+Labels:                   app=nginx
+Annotations:              service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+                          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:iam::890953945913:server-certificate/my-nginx-cert
+                          service.beta.kubernetes.io/aws-load-balancer-ssl-ports: 443
+Selector:                 app=nginx,tier=frontend
+Type:                     LoadBalancer
+IP:                       100.66.231.105
+LoadBalancer Ingress:     a6c8448e975e64b03b54d35103b6d9e5-168820584.eu-west-2.elb.amazonaws.com
+Port:                     https  443/TCP
+TargetPort:               80/TCP
+NodePort:                 https  30885/TCP
+Endpoints:                100.96.1.4:80,100.96.1.5:80,100.96.2.3:80 + 1 more...
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type    Reason                Age    From                Message
+  ----    ------                ----   ----                -------
+  Normal  EnsuringLoadBalancer  5m41s  service-controller  Ensuring load balancer
+  Normal  EnsuredLoadBalancer   5m39s  service-controller  Ensured load balancer
+```
+
+And a view to see if everything is working:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local
+➜ kc get svc,deploy,pods -l "app=nginx"
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP                                    PORT(S)
+service/nginx   LoadBalancer   100.66.231.105   a6c8448e975e64b03b54d35103b6d9e5-168820584.eu-west-2.elb.amazonaws.com                                                                            443:30885/TCP
+
+NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx   4/4     4            4           7m24s
+
+NAME                        READY   STATUS    RESTARTS   AGE
+pod/nginx-98785bc64-h6p8g   2/2     Running   0          7m24s
+pod/nginx-98785bc64-rzsvz   2/2     Running   0          7m24s
+pod/nginx-98785bc64-s6pk8   2/2     Running   0          7m24s
+pod/nginx-98785bc64-t68m2   2/2     Running   0          7m24s
+```
+
+We can now hit the endpoint:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local
+➜ http --verify=no https://a6c8448e975e64b03b54d35103b6d9e5-168820584.eu-west-2.elb.amazonaws.com
+HTTP/1.1 200 OK
+```
+
+Or if you are not using httpie then:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local
+➜ curl https://a6c8448e975e64b03b54d35103b6d9e5-168820584.eu-west-2.elb.amazonaws.com --insecure
+Hello, Welcome to Kubernetes on AWS Git-Sync Demo
+```
+
+Let's clean up:
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local
+➜ kc delete svc,deploy -l "app=nginx"
+service "nginx" deleted
+deployment.apps "nginx" deleted
+```
+
+```bash
+kubernetes-backwards/kubernetes-mastery-on-aws/k8s/services at ☸️ backwards.k8s.local took 23s
+➜ aws iam delete-server-certificate --server-certificate-name my-nginx-cert
+```
+

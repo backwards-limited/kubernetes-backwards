@@ -120,3 +120,6 @@ INFO: Unsupported notification method: $/setTraceNotification
 Jun 06, 2020 10:05:58 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
 WARNING: Unmatched cancel notification for request id 3
 2020.06.07 00:25:42 INFO  shutting down Metals
+2020.06.09 08:34:52 INFO  started: Metals version 0.9.0 in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'
+2020.06.09 08:34:53 INFO  time: initialize in 0.98s
+2020.06.09 08:34:55 WARN  no build tool detected in workspace '/Users/davidainslie/workspace/backwards/kubernetes-backwards'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
