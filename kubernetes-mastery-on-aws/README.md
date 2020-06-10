@@ -27,3 +27,5 @@
   - [Deployments](docs/deployments.md)
 
   - [Services](docs/services.md)
+  
+  - [Ingress](docs/ingress.md)
